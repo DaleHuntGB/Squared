@@ -4,6 +4,6 @@ LoopLoop is a WIP Private Project that will be solely developed by myself. The a
 
 # 📚 Libraries
 
-• [RayLib](https://github.com/raysan5/raylib)
-• [Make](https://developers.make.com/api-documentation/make-api-documentation)
+- [RayLib](https://github.com/raysan5/raylib)
+- [Make](https://developers.make.com/api-documentation/make-api-documentation)
 
