@@ -45,6 +45,7 @@ private:
     std::string playerName;
     int playerHealth;
     int playerSpeed;
+    int playerScore;
     Vector2 playerPosition;
     float burstCD = 0.0f;
     float cooldownSpeed = 1.0f;
@@ -58,7 +59,7 @@ private:
     std::vector<Projectile> &projectiles;   
 
 public:
-    Player(const std::string &playerName, int playerHealth, int playerSpeed, Vector2 playerPosition, int moveUp, int moveDown, int moveLeft, int moveRight, int Shoot, std::vector<Projectile> &projectiles) 
+    Player(const std::string &playerName, int playerHealth, int playerSpeed, Vector2 playerPosition, int moveUp, int moveDown, int moveLeft, int moveRight, int Shoot, std::vector<Projectile> &projectiles, int playerScore = 0) 
     : playerName(playerName), playerHealth(playerHealth), playerSpeed(playerSpeed), playerPosition(playerPosition), moveUp(moveUp), moveDown(moveDown), moveLeft(moveLeft), moveRight(moveRight), shoot(Shoot), projectiles(projectiles) {}
 
     void movePlayer()
@@ -133,6 +134,7 @@ public:
     float getBurstCD() { return burstCD; }
     Vector2& getPlayerPosition() { return playerPosition; }
     std::string getPlayerName() { return playerName; }
+    int updatePlayerScore(int amount) { return playerScore += amount; }
 };
 
 class Enemy
@@ -222,6 +224,7 @@ int main()
         std::string burstText = "Burst CD: " + std::to_string(static_cast<int>(ceil(player.getBurstCD())));
         if (player.getBurstCD() <= 0.0f) { burstText = "Burst Ready!"; }
         DrawText(burstText.c_str(), 10, 10, 20, BLACK);
+        DrawText(("Score: " + std::to_string(player.updatePlayerScore(0))).c_str(), 10, 40, 20, BLACK);
         for (size_t i = 0; i < projectiles.size(); i++)
         {
             projectiles[i].MoveProjectile();
@@ -248,6 +251,7 @@ int main()
                     {
                         enemies.erase(enemies.begin() + j);
                         j--;
+                        player.updatePlayerScore(10);
                     }
                     break;
                 }
