@@ -45,7 +45,7 @@ private:
     std::string playerName;
     int playerHealth;
     int playerSpeed;
-    int playerScore;
+    int playerScore = 0;
     Vector2 playerPosition;
     float burstCD = 0.0f;
     float cooldownSpeed = 1.0f;
@@ -132,6 +132,7 @@ public:
 
 
     float getBurstCD() { return burstCD; }
+    void setBurstCD(float value) { burstCD = value; }
     Vector2& getPlayerPosition() { return playerPosition; }
     std::string getPlayerName() { return playerName; }
     int updatePlayerScore(int amount) { return playerScore += amount; }
@@ -196,10 +197,11 @@ class CollisionManager
 
 class GameManager
 {
-    private:
-        float waveTimer = 30.0f; // Start off with 30 seconds so that it spawns enemies immediately.
-        int currentWave = 0;
-    public:
+private:
+    float waveTimer = 30.0f; // Timer to track wave spawning
+    int currentWave = 0;
+
+public:
     void SpawnEnemies(Player& player, std::vector<Enemy>& enemies, int NUM_OF_WAVES)
     {
         waveTimer += GetFrameTime();
@@ -220,79 +222,165 @@ class GameManager
             std::cout << "Wave " << currentWave << " of " << NUM_OF_WAVES << " has begun!" << std::endl;
         }
     }
-    
-    float getWaveTimer() { return waveTimer; }
+
     int getCurrentWave() { return currentWave; }
+    float getWaveTimer() { return waveTimer; }
+};
+
+class PowerUpManager
+{
+private:
+    struct PowerUp
+    {
+        int type;
+        Vector2 position;
+        bool active;
+    };
+
+    std::vector<PowerUp> activePowerUps;
+
+public:
+    void SpawnPowerUp(int powerUpType)
+    {
+        PowerUp newPowerUp = {powerUpType, {GetRandomValue(0, SCREEN_WIDTH), GetRandomValue(0, SCREEN_HEIGHT)}, true};
+        activePowerUps.push_back(newPowerUp);
+    }
+
+    void DrawPowerUps()
+    {
+        for (const auto& powerUp : activePowerUps)
+        {
+            if (!powerUp.active) continue;
+
+            switch (powerUp.type)
+            {
+            case 0: // Health
+                DrawCircle(powerUp.position.x, powerUp.position.y, 10, GREEN);
+                std::cout << "Health PowerUp Spawned!" << std::endl;
+                break;
+            case 1: // Speed
+                DrawCircle(powerUp.position.x, powerUp.position.y, 10, YELLOW);
+                std::cout << "Speed PowerUp Spawned!" << std::endl;
+                break;
+            case 2: // Damage
+                DrawCircle(powerUp.position.x, powerUp.position.y, 10, RED);
+                std::cout << "Damage PowerUp Spawned!" << std::endl;
+                break;
+            case 3: // Burst
+                DrawCircle(powerUp.position.x, powerUp.position.y, 10, BLUE);
+                std::cout << "Burst PowerUp Spawned!" << std::endl;
+                break;
+            }
+        }
+    }
+
+    void CheckPowerUpCollision(Player& player)
+    {
+        for (auto& powerUp : activePowerUps)
+        {
+            if (!powerUp.active) continue;
+
+            if (CollisionManager::CheckCollision(player.getPlayerPosition(), powerUp.position, 16, 10))
+            {
+                powerUp.active = false;
+                ApplyPowerUp(player, powerUp.type);
+            }
+        }
+    }
+
+    void ApplyPowerUp(Player& player, int powerUpType)
+    {
+        switch (powerUpType)
+        {
+        case 0: // Health
+            std::cout << "Health PowerUp Collected!" << std::endl;
+            break;
+        case 1: // Speed
+            std::cout << "Speed PowerUp Collected!" << std::endl;
+            break;
+        case 2: // Damage
+            std::cout << "Damage PowerUp Collected!" << std::endl;
+            break;
+        case 3: // Burst
+            std::cout << "Burst PowerUp Collected!" << std::endl;
+            player.setBurstCD(0.0f);
+            break;
+        }
+    }
 };
 
 int main()
 {
-    const char *windowTitle = "LoopLoop";
+    const char* windowTitle = "LoopLoop";
     std::vector<Projectile> projectiles;
     std::vector<Enemy> enemies;
-    static Player player("Unhalted", 100, 5, {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2}, KEY_W, KEY_S, KEY_A, KEY_D, MOUSE_BUTTON_LEFT, projectiles);
-    static GameManager gameManager;
+    Player player("Unhalted", 100, 5, {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2}, KEY_W, KEY_S, KEY_A, KEY_D, MOUSE_BUTTON_LEFT, projectiles);
+    GameManager gameManager;
+    PowerUpManager powerUpManager;
+    CollisionManager collisionManager;
+
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, windowTitle);
     SetTargetFPS(TARGET_FPS);
 
-    // for (int i = 0; i < NUM_ENEMIES; i++)
-    // {
-    //     float angle = i * (360.0f / NUM_ENEMIES) * DEG2RAD;
-    //     Vector2 spawnPosition = {
-    //         player.getPlayerPosition().x + cos(angle) * ENEMY_SPAWN_RADIUS,
-    //         player.getPlayerPosition().y + sin(angle) * ENEMY_SPAWN_RADIUS
-    //     };
-    //     enemies.emplace_back(100, 2, spawnPosition);
-    // }
-
-    gameManager.SpawnEnemies(player, enemies, 5);
-    
     while (!WindowShouldClose())
     {
         BeginDrawing();
         ClearBackground(GRAY);
-        player.DrawPlayer(BLACK);
+
+        // Player actions
         player.movePlayer();
         player.UpdateBurstCD();
+        player.DrawPlayer(BLACK);
+
+        // Manage waves and enemies
         gameManager.SpawnEnemies(player, enemies, 5);
-        CollisionManager::CheckBounds(player.getPlayerPosition(), SCREEN_WIDTH, SCREEN_HEIGHT);
-        std::string burstText = "Burst CD: " + std::to_string(static_cast<int>(ceil(player.getBurstCD())));
-        if (player.getBurstCD() <= 0.0f) { burstText = "Burst Ready!"; }
-        DrawText(burstText.c_str(), 10, 10, 20, BLACK);
-        DrawText(("Score: " + std::to_string(player.updatePlayerScore(0))).c_str(), 10, 40, 20, BLACK);
-        DrawText(("Wave: " + std::to_string(gameManager.getCurrentWave())).c_str(), 10, 70, 20, BLACK);
-        DrawText(("Wave Timer: " + std::to_string(static_cast<int>(ceil(gameManager.getWaveTimer())))).c_str(), 10, 100, 20, BLACK);
+        for (Enemy& enemy : enemies)
+        {
+            enemy.MoveEnemy(player.getPlayerPosition());
+            enemy.DrawEnemy(RED);
+        }
+
+        // Handle projectiles
         for (size_t i = 0; i < projectiles.size(); i++)
         {
             projectiles[i].MoveProjectile();
             projectiles[i].DrawProjectile();
         }
 
-        for (Enemy &enemy : enemies)
-        {
-            enemy.MoveEnemy(player.getPlayerPosition());
-            enemy.DrawEnemy(RED);
-        }
-
+        // Handle Collisions
         for (size_t i = 0; i < projectiles.size(); i++)
         {
             for (size_t j = 0; j < enemies.size(); j++)
             {
-                if (CollisionManager::CheckCollision(projectiles[i].getPosition(), enemies[j].getEnemyPosition(), 10, 16)) // Check Collision Between Projectile & Enemy.
+                if (collisionManager.CheckCollision(projectiles[i].getPosition(), enemies[j].getEnemyPosition(), 10, 16))
                 {
                     enemies[j].decreaseHealth(10);
-                    // TODO: Check Damage Based on Projectile Type
                     projectiles.erase(projectiles.begin() + i);
-                    i--;
                     if (enemies[j].isDead())
                     {
                         enemies.erase(enemies.begin() + j);
-                        j--;
                         player.updatePlayerScore(10);
+                        powerUpManager.SpawnPowerUp(GetRandomValue(0, 3));
                     }
-                    break;
                 }
             }
+        }
+
+        // Handle power-ups
+        powerUpManager.DrawPowerUps();
+        powerUpManager.CheckPowerUpCollision(player);
+
+        // Display HUD
+        DrawText(("Score: " + std::to_string(player.updatePlayerScore(0))).c_str(), 10, 10, 20, BLACK);
+        DrawText(("Wave: " + std::to_string(gameManager.getCurrentWave())).c_str(), 10, 40, 20, BLACK);
+        DrawText(("Wave Timer: " + std::to_string(static_cast<int>(ceil(gameManager.getWaveTimer())))).c_str(), 10, 70, 20, BLACK);
+        if (player.getBurstCD() > 0.0f)
+        {
+            DrawText(("Burst CD: " + std::to_string(static_cast<int>(ceil(player.getBurstCD())))).c_str(), 10, 100, 20, RED);
+        }
+        else
+        {
+            DrawText("BurstCD: Ready!", 10, 100, 20, GREEN);
         }
 
         EndDrawing();
