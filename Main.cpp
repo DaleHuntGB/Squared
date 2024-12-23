@@ -46,6 +46,7 @@ private:
     int playerHealth;
     int playerSpeed;
     int playerScore = 0;
+    int playerDamage = 10;
     Vector2 playerPosition;
     float burstCD = 0.0f;
     float cooldownSpeed = 1.0f;
@@ -56,11 +57,11 @@ private:
     int moveRight;
     int shoot;
 
-    std::vector<Projectile> &projectiles;   
+    std::vector<Projectile> &projectiles;
 
 public:
-    Player(int playerHealth, int playerSpeed, Vector2 playerPosition, int moveUp, int moveDown, int moveLeft, int moveRight, int Shoot, std::vector<Projectile> &projectiles, int playerScore = 0) 
-    : playerHealth(playerHealth), playerSpeed(playerSpeed), playerPosition(playerPosition), moveUp(moveUp), moveDown(moveDown), moveLeft(moveLeft), moveRight(moveRight), shoot(Shoot), projectiles(projectiles) {}
+    Player(int playerHealth, int playerSpeed, Vector2 playerPosition, int moveUp, int moveDown, int moveLeft, int moveRight, int Shoot, std::vector<Projectile> &projectiles, int playerScore = 0, int playerDamage = 10) 
+    : playerHealth(playerHealth), playerSpeed(playerSpeed), playerPosition(playerPosition), moveUp(moveUp), moveDown(moveDown), moveLeft(moveLeft), moveRight(moveRight), shoot(Shoot), projectiles(projectiles), playerDamage(playerDamage) {}
 
     void movePlayer()
     {
@@ -78,7 +79,6 @@ public:
             direction.y /= magnitude;
         }
 
-        // Apply movement
         playerPosition.x += direction.x * playerSpeed;
         playerPosition.y += direction.y * playerSpeed;
 
@@ -128,22 +128,26 @@ public:
         }
     }
 
-
     float getBurstCD() const { return burstCD; }
     void setBurstCD(float value) { burstCD = value; }
     Vector2& getPlayerPosition() { return playerPosition; }
     int updatePlayerScore(int amount) { return playerScore += amount; }
+    int getPlayerHealth() const { return playerHealth; }
+    void decreaseHealth(int amount) { playerHealth -= amount; }
+    int getPlayerDamage() const { return playerDamage; }
+    void setPlayerDamage(int amount) { playerDamage = amount; }
+    int getPlayerSpeed() const { return playerSpeed; }
+    void setPlayerSpeed(int amount) { playerSpeed = amount; }
 };
 
 class Enemy
 {
-    private:
+private:
     int enemyHealth;
     int enemySpeed;
     Vector2 enemyPosition;
-    public:
+public:
     Enemy(int enemyHealth, int enemySpeed, Vector2 enemyPosition) : enemyHealth(enemyHealth), enemySpeed(enemySpeed), enemyPosition(enemyPosition) {}
-    Enemy(Vector2 enemyPosition, int enemyHealth) : enemyHealth(enemyHealth), enemySpeed(enemySpeed), enemyPosition(enemyPosition) {}
 
     void MoveEnemy(Vector2 playerPosition)
     {
@@ -176,7 +180,7 @@ class Enemy
 
 class CollisionManager
 {
-    public:
+public:
     static bool CheckCollision(Vector2 position1, Vector2 position2, float radius1, float radius2)
     {
         float distance = sqrt(pow(position2.x - position1.x, 2) + pow(position2.y - position1.y, 2));
@@ -195,7 +199,7 @@ class CollisionManager
 class GameManager
 {
 private:
-    float waveTimer = 30.0f; // Timer to track wave spawning
+    float waveTimer = 30.0f;
     int currentWave = 0;
 
 public:
@@ -234,53 +238,78 @@ private:
         bool active;
     };
 
-    std::vector<PowerUp> activePowerUps;
+    struct ActivePowerUp
+    {
+        int type;
+        float remainingTime;
+    };
+
+    std::vector<PowerUp> positionalPowerUps;
+    std::vector<ActivePowerUp> activePowerUps;
 
 public:
     void SpawnPowerUp(int powerUpType)
     {
         PowerUp newPowerUp = {powerUpType, {GetRandomValue(0, SCREEN_WIDTH), GetRandomValue(0, SCREEN_HEIGHT)}, true};
-        activePowerUps.push_back(newPowerUp);
+        positionalPowerUps.push_back(newPowerUp);
     }
 
     void DrawPowerUps()
     {
-        for (const auto& powerUp : activePowerUps)
+        for (const auto& powerUp : positionalPowerUps)
         {
             if (!powerUp.active) continue;
 
+            Color color;
             switch (powerUp.type)
             {
-            case 0: // Health
-                DrawCircle(powerUp.position.x, powerUp.position.y, 10, GREEN);
-                std::cout << "Health PowerUp Spawned!" << std::endl;
-                break;
-            case 1: // Speed
-                DrawCircle(powerUp.position.x, powerUp.position.y, 10, YELLOW);
-                std::cout << "Speed PowerUp Spawned!" << std::endl;
-                break;
-            case 2: // Damage
-                DrawCircle(powerUp.position.x, powerUp.position.y, 10, RED);
-                std::cout << "Damage PowerUp Spawned!" << std::endl;
-                break;
-            case 3: // Burst
-                DrawCircle(powerUp.position.x, powerUp.position.y, 10, BLUE);
-                std::cout << "Burst PowerUp Spawned!" << std::endl;
-                break;
+            case 0: color = GREEN; break;
+            case 1: color = YELLOW; break;
+            case 2: color = RED; break;
+            case 3: color = BLUE; break;
+            default: color = GRAY; break;
             }
+
+            DrawCircle(powerUp.position.x, powerUp.position.y, 10, color);
         }
     }
 
     void CheckPowerUpCollision(Player& player)
     {
-        for (auto& powerUp : activePowerUps)
+        for (auto& powerUp : positionalPowerUps)
         {
             if (!powerUp.active) continue;
 
             if (CollisionManager::CheckCollision(player.getPlayerPosition(), powerUp.position, 16, 10))
             {
                 powerUp.active = false;
-                ApplyPowerUp(player, powerUp.type);
+                StartPowerUpTimer(player, powerUp.type);
+            }
+        }
+    }
+
+    void StartPowerUpTimer(Player& player, int powerUpType)
+    {
+        float duration = 10.0f;
+        ApplyPowerUp(player, powerUpType);
+        activePowerUps.push_back({powerUpType, duration});
+    }
+
+    void UpdatePowerUpTimers(Player& player)
+    {
+        for (size_t i = 0; i < activePowerUps.size();)
+        {
+            ActivePowerUp& powerUp = activePowerUps[i];
+            powerUp.remainingTime -= GetFrameTime();
+
+            if (powerUp.remainingTime <= 0.0f)
+            {
+                RevertPowerUp(player, powerUp.type);
+                activePowerUps.erase(activePowerUps.begin() + i);
+            }
+            else
+            {
+                ++i;
             }
         }
     }
@@ -289,19 +318,20 @@ public:
     {
         switch (powerUpType)
         {
-        case 0: // Health
-            std::cout << "Health PowerUp Collected!" << std::endl;
-            break;
-        case 1: // Speed
-            std::cout << "Speed PowerUp Collected!" << std::endl;
-            break;
-        case 2: // Damage
-            std::cout << "Damage PowerUp Collected!" << std::endl;
-            break;
-        case 3: // Burst
-            std::cout << "Burst PowerUp Collected!" << std::endl;
-            player.setBurstCD(0.0f);
-            break;
+        case 0: break;
+        case 1: player.setPlayerSpeed(player.getPlayerSpeed() + 2); break;
+        case 2: player.setPlayerDamage(20); break;
+        case 3: player.setBurstCD(0.0f); break;
+        }
+    }
+
+    void RevertPowerUp(Player& player, int powerUpType)
+    {
+        switch (powerUpType)
+        {
+        case 1: player.setPlayerSpeed(player.getPlayerSpeed() - 2); break;
+        case 2: player.setPlayerDamage(10); break;
+        case 3: break;
         }
     }
 };
@@ -314,7 +344,6 @@ int main()
     Player player(100, 5, {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2}, KEY_W, KEY_S, KEY_A, KEY_D, MOUSE_BUTTON_LEFT, projectiles);
     GameManager gameManager;
     PowerUpManager powerUpManager;
-    CollisionManager collisionManager;
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, windowTitle);
     SetTargetFPS(TARGET_FPS);
@@ -324,12 +353,10 @@ int main()
         BeginDrawing();
         ClearBackground(GRAY);
 
-        // Player actions
         player.movePlayer();
         player.UpdateBurstCD();
         player.DrawPlayer(BLACK);
 
-        // Manage waves and enemies
         gameManager.SpawnEnemies(player, enemies, 5);
         for (Enemy& enemy : enemies)
         {
@@ -337,27 +364,20 @@ int main()
             enemy.DrawEnemy(RED);
         }
 
-        // Handle projectiles
         for (size_t i = 0; i < projectiles.size(); i++)
         {
             projectiles[i].MoveProjectile();
             projectiles[i].DrawProjectile();
         }
 
-        // Handle Collisions
         for (size_t i = 0; i < projectiles.size(); i++)
         {
             for (size_t j = 0; j < enemies.size(); j++)
             {
-                if (collisionManager.CheckCollision(projectiles[i].getPosition(), enemies[j].getEnemyPosition(), 10, 16))
+                if (CollisionManager::CheckCollision(projectiles[i].getPosition(), enemies[j].getEnemyPosition(), 10, 16))
                 {
-                    enemies[j].decreaseHealth(10);
-                    projectiles.erase(
-                        std::remove_if(projectiles.begin(), projectiles.end(),
-                                    [&](const Projectile& p) {
-                                        return collisionManager.CheckCollision(p.getPosition(), enemies[j].getEnemyPosition(), 10, 16);
-                                    }),
-                        projectiles.end());
+                    enemies[j].decreaseHealth(player.getPlayerDamage());
+                    projectiles.erase(projectiles.begin() + i);
                     if (enemies[j].isDead())
                     {
                         enemies.erase(enemies.begin() + j);
@@ -368,11 +388,10 @@ int main()
             }
         }
 
-        // Handle power-ups
         powerUpManager.DrawPowerUps();
         powerUpManager.CheckPowerUpCollision(player);
+        powerUpManager.UpdatePowerUpTimers(player);
 
-        // Display HUD
         DrawText(("Score: " + std::to_string(player.updatePlayerScore(0))).c_str(), 10, 10, 20, BLACK);
         DrawText(("Wave: " + std::to_string(gameManager.getCurrentWave())).c_str(), 10, 40, 20, BLACK);
         DrawText(("Wave Timer: " + std::to_string(static_cast<int>(ceil(gameManager.getWaveTimer())))).c_str(), 10, 70, 20, BLACK);
