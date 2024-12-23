@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <algorithm>
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
@@ -64,22 +65,24 @@ public:
 
     void movePlayer()
     {
-        if (IsKeyDown(moveUp))
+        Vector2 direction = {0.0f, 0.0f};
+
+        if (IsKeyDown(moveUp)) direction.y -= 1;
+        if (IsKeyDown(moveDown)) direction.y += 1;
+        if (IsKeyDown(moveLeft)) direction.x -= 1;
+        if (IsKeyDown(moveRight)) direction.x += 1;
+
+        float magnitude = sqrt(direction.x * direction.x + direction.y * direction.y);
+        if (magnitude > 0.0f)
         {
-            playerPosition.y -= playerSpeed;
+            direction.x /= magnitude;
+            direction.y /= magnitude;
         }
-        if (IsKeyDown(moveDown))
-        {
-            playerPosition.y += playerSpeed;
-        }
-        if (IsKeyDown(moveLeft))
-        {
-            playerPosition.x -= playerSpeed;
-        }
-        if (IsKeyDown(moveRight))
-        {
-            playerPosition.x += playerSpeed;
-        }
+
+        // Apply movement
+        playerPosition.x += direction.x * playerSpeed;
+        playerPosition.y += direction.y * playerSpeed;
+        
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || IsKeyPressed(KEY_SPACE))
         {
             Shoot();
@@ -89,7 +92,6 @@ public:
             Burst();
         }
     }
-
     void DrawPlayer(Color playerColor)
     {
         DrawRectangle(playerPosition.x, playerPosition.y, 32, 32, playerColor);
@@ -165,7 +167,7 @@ class Enemy
         DrawRectangle(enemyPosition.x, enemyPosition.y - 10, 32 * (enemyHealth / 100.0f), 5, GREEN);
     }
 
-    Vector2 getEnemyPosition() { return enemyPosition; }
+    Vector2 getEnemyPosition() const { return enemyPosition; }
     int getEnemyHealth() { return enemyHealth; }
     void decreaseHealth(int amount)
     {
@@ -355,7 +357,12 @@ int main()
                 if (collisionManager.CheckCollision(projectiles[i].getPosition(), enemies[j].getEnemyPosition(), 10, 16))
                 {
                     enemies[j].decreaseHealth(10);
-                    projectiles.erase(projectiles.begin() + i);
+                    projectiles.erase(
+                        std::remove_if(projectiles.begin(), projectiles.end(),
+                                    [&](const Projectile& p) {
+                                        return collisionManager.CheckCollision(p.getPosition(), enemies[j].getEnemyPosition(), 10, 16);
+                                    }),
+                        projectiles.end());
                     if (enemies[j].isDead())
                     {
                         enemies.erase(enemies.begin() + j);
