@@ -374,14 +374,8 @@ int main()
         DrawText(("Score: " + std::to_string(player.updatePlayerScore(0))).c_str(), 10, 10, 20, BLACK);
         DrawText(("Wave: " + std::to_string(gameManager.getCurrentWave())).c_str(), 10, 40, 20, BLACK);
         DrawText(("Wave Timer: " + std::to_string(static_cast<int>(ceil(gameManager.getWaveTimer())))).c_str(), 10, 70, 20, BLACK);
-        if (player.getBurstCD() > 0.0f)
-        {
-            DrawText(("Burst CD: " + std::to_string(static_cast<int>(ceil(player.getBurstCD())))).c_str(), 10, 100, 20, RED);
-        }
-        else
-        {
-            DrawText("BurstCD: Ready!", 10, 100, 20, GREEN);
-        }
+        if (player.getBurstCD() > 0.0f) { DrawText(("Burst CD: " + std::to_string(static_cast<int>(ceil(player.getBurstCD())))).c_str(), 10, 100, 20, RED); }
+        else { DrawText("BurstCD: Ready!", 10, 100, 20, GREEN); }
 
         EndDrawing();
     }
