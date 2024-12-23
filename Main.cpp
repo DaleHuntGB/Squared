@@ -37,13 +37,12 @@ public:
         DrawCircle(projectilePosition.x, projectilePosition.y, 10, BLACK);
     }
 
-    Vector2 getPosition() { return projectilePosition; }
+    Vector2 getPosition() const { return projectilePosition; }
 };
 
 class Player
 {
 private:
-    std::string playerName;
     int playerHealth;
     int playerSpeed;
     int playerScore = 0;
@@ -60,8 +59,8 @@ private:
     std::vector<Projectile> &projectiles;   
 
 public:
-    Player(const std::string &playerName, int playerHealth, int playerSpeed, Vector2 playerPosition, int moveUp, int moveDown, int moveLeft, int moveRight, int Shoot, std::vector<Projectile> &projectiles, int playerScore = 0) 
-    : playerName(playerName), playerHealth(playerHealth), playerSpeed(playerSpeed), playerPosition(playerPosition), moveUp(moveUp), moveDown(moveDown), moveLeft(moveLeft), moveRight(moveRight), shoot(Shoot), projectiles(projectiles) {}
+    Player(int playerHealth, int playerSpeed, Vector2 playerPosition, int moveUp, int moveDown, int moveLeft, int moveRight, int Shoot, std::vector<Projectile> &projectiles, int playerScore = 0) 
+    : playerHealth(playerHealth), playerSpeed(playerSpeed), playerPosition(playerPosition), moveUp(moveUp), moveDown(moveDown), moveLeft(moveLeft), moveRight(moveRight), shoot(Shoot), projectiles(projectiles) {}
 
     void movePlayer()
     {
@@ -82,7 +81,7 @@ public:
         // Apply movement
         playerPosition.x += direction.x * playerSpeed;
         playerPosition.y += direction.y * playerSpeed;
-        
+
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || IsKeyPressed(KEY_SPACE))
         {
             Shoot();
@@ -92,13 +91,10 @@ public:
             Burst();
         }
     }
+    
     void DrawPlayer(Color playerColor)
     {
         DrawRectangle(playerPosition.x, playerPosition.y, 32, 32, playerColor);
-        int textWidth = MeasureText(playerName.c_str(), 20);
-        int textX = playerPosition.x + 20 - textWidth / 2;
-        int textY = playerPosition.y - 20;
-        DrawText(playerName.c_str(), textX, textY, 20, BLACK);
     }
 
     void Shoot()
@@ -136,7 +132,6 @@ public:
     float getBurstCD() { return burstCD; }
     void setBurstCD(float value) { burstCD = value; }
     Vector2& getPlayerPosition() { return playerPosition; }
-    std::string getPlayerName() { return playerName; }
     int updatePlayerScore(int amount) { return playerScore += amount; }
 };
 
@@ -316,7 +311,7 @@ int main()
     const char* windowTitle = "LoopLoop";
     std::vector<Projectile> projectiles;
     std::vector<Enemy> enemies;
-    Player player("Unhalted", 100, 5, {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2}, KEY_W, KEY_S, KEY_A, KEY_D, MOUSE_BUTTON_LEFT, projectiles);
+    Player player(100, 5, {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2}, KEY_W, KEY_S, KEY_A, KEY_D, MOUSE_BUTTON_LEFT, projectiles);
     GameManager gameManager;
     PowerUpManager powerUpManager;
     CollisionManager collisionManager;
