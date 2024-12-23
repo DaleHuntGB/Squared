@@ -194,24 +194,58 @@ class CollisionManager
     }
 };
 
+class GameManager
+{
+    private:
+        float waveTimer = 30.0f; // Start off with 30 seconds so that it spawns enemies immediately.
+        int currentWave = 0;
+    public:
+    void SpawnEnemies(Player& player, std::vector<Enemy>& enemies, int NUM_OF_WAVES)
+    {
+        waveTimer += GetFrameTime();
+        if (waveTimer >= 30.0f && currentWave < NUM_OF_WAVES)
+        {
+            for (int i = 0; i < NUM_ENEMIES; i++)
+            {
+                float angle = i * (360.0f / NUM_ENEMIES) * DEG2RAD;
+                Vector2 spawnPosition = {
+                    player.getPlayerPosition().x + cos(angle) * ENEMY_SPAWN_RADIUS,
+                    player.getPlayerPosition().y + sin(angle) * ENEMY_SPAWN_RADIUS
+                };
+                enemies.emplace_back(100, 2, spawnPosition);
+            }
+
+            currentWave++;
+            waveTimer = 0.0f;
+            std::cout << "Wave " << currentWave << " of " << NUM_OF_WAVES << " has begun!" << std::endl;
+        }
+    }
+    
+    float getWaveTimer() { return waveTimer; }
+    int getCurrentWave() { return currentWave; }
+};
+
 int main()
 {
     const char *windowTitle = "LoopLoop";
     std::vector<Projectile> projectiles;
     std::vector<Enemy> enemies;
     static Player player("Unhalted", 100, 5, {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2}, KEY_W, KEY_S, KEY_A, KEY_D, MOUSE_BUTTON_LEFT, projectiles);
+    static GameManager gameManager;
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, windowTitle);
     SetTargetFPS(TARGET_FPS);
 
-    for (int i = 0; i < NUM_ENEMIES; i++)
-    {
-        float angle = i * (360.0f / NUM_ENEMIES) * DEG2RAD;
-        Vector2 spawnPosition = {
-            player.getPlayerPosition().x + cos(angle) * ENEMY_SPAWN_RADIUS,
-            player.getPlayerPosition().y + sin(angle) * ENEMY_SPAWN_RADIUS
-        };
-        enemies.emplace_back(100, 2, spawnPosition);
-    }
+    // for (int i = 0; i < NUM_ENEMIES; i++)
+    // {
+    //     float angle = i * (360.0f / NUM_ENEMIES) * DEG2RAD;
+    //     Vector2 spawnPosition = {
+    //         player.getPlayerPosition().x + cos(angle) * ENEMY_SPAWN_RADIUS,
+    //         player.getPlayerPosition().y + sin(angle) * ENEMY_SPAWN_RADIUS
+    //     };
+    //     enemies.emplace_back(100, 2, spawnPosition);
+    // }
+
+    gameManager.SpawnEnemies(player, enemies, 5);
     
     while (!WindowShouldClose())
     {
@@ -220,11 +254,14 @@ int main()
         player.DrawPlayer(BLACK);
         player.movePlayer();
         player.UpdateBurstCD();
+        gameManager.SpawnEnemies(player, enemies, 5);
         CollisionManager::CheckBounds(player.getPlayerPosition(), SCREEN_WIDTH, SCREEN_HEIGHT);
         std::string burstText = "Burst CD: " + std::to_string(static_cast<int>(ceil(player.getBurstCD())));
         if (player.getBurstCD() <= 0.0f) { burstText = "Burst Ready!"; }
         DrawText(burstText.c_str(), 10, 10, 20, BLACK);
         DrawText(("Score: " + std::to_string(player.updatePlayerScore(0))).c_str(), 10, 40, 20, BLACK);
+        DrawText(("Wave: " + std::to_string(gameManager.getCurrentWave())).c_str(), 10, 70, 20, BLACK);
+        DrawText(("Wave Timer: " + std::to_string(static_cast<int>(ceil(gameManager.getWaveTimer())))).c_str(), 10, 100, 20, BLACK);
         for (size_t i = 0; i < projectiles.size(); i++)
         {
             projectiles[i].MoveProjectile();
