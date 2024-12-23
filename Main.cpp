@@ -129,7 +129,7 @@ public:
     }
 
 
-    float getBurstCD() { return burstCD; }
+    float getBurstCD() const { return burstCD; }
     void setBurstCD(float value) { burstCD = value; }
     Vector2& getPlayerPosition() { return playerPosition; }
     int updatePlayerScore(int amount) { return playerScore += amount; }
