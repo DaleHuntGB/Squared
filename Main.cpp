@@ -349,8 +349,9 @@ int main()
     GameManager gameManager;
     PowerUpManager powerUpManager;
     CollisionManager collisionManager;
-
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, windowTitle);
+    Image playerSpriteImage = LoadImage("Assets/PlayerSprite.png");
+    Texture2D playerSprite = LoadTextureFromImage(playerSpriteImage);
     SetTargetFPS(TARGET_FPS);
 
     while (!WindowShouldClose())
@@ -360,7 +361,8 @@ int main()
 
         player.movePlayer();
         player.UpdateBurstCD();
-        player.DrawPlayer(BLACK);
+        // player.DrawPlayer(BLACK);
+        DrawTextureEx(playerSprite, {player.getPlayerPosition().x - playerSprite.width / 2, player.getPlayerPosition().y - playerSprite.height / 2}, 0.0f, 1.0f, WHITE);
 
         gameManager.SpawnEnemies(player, enemies, 5);
         for (Enemy& enemy : enemies)
@@ -426,6 +428,8 @@ int main()
         EndDrawing();
     }
 
+    UnloadImage(playerSpriteImage);
+    UnloadTexture(playerSprite);
     CloseWindow();
     return 0;
 }
