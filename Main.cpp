@@ -5,8 +5,8 @@
 #include <cmath>
 #include <algorithm>
 
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
+#define SCREEN_WIDTH 1280
+#define SCREEN_HEIGHT 720
 #define TARGET_FPS 60
 #define NUM_ENEMIES 5
 #define ENEMY_SPAWN_RADIUS 700
@@ -399,7 +399,13 @@ int main()
         DrawText(("Wave: " + std::to_string(gameManager.getCurrentWave())).c_str(), 10, 40, 20, BLACK);
         DrawText(("Wave Timer: " + std::to_string(static_cast<int>(ceil(gameManager.getWaveTimer())))).c_str(), 10, 70, 20, BLACK);
         if (player.getBurstCD() > 0.0f) { DrawText(("Burst CD: " + std::to_string(static_cast<int>(ceil(player.getBurstCD())))).c_str(), 10, 100, 20, RED); }
-        else { DrawText("BurstCD: Ready!", 10, 100, 20, GREEN); }
+        else { DrawText("Burst: Ready!", 10, 100, 20, GREEN); }
+        // Store Player Health as a variable so that we can measure the text
+        // to help with centering / positioning.
+        std::string playerHealthText = "Health: " + std::to_string(player.getPlayerHealth());
+        int playerHealthTextWidth = MeasureText(playerHealthText.c_str(), 20);
+        Vector2 textPosition = {SCREEN_WIDTH / 2 - playerHealthTextWidth / 2, SCREEN_HEIGHT - 30};
+        DrawText(playerHealthText.c_str(), textPosition.x, textPosition.y, 20, BLACK);
 
         EndDrawing();
     }
