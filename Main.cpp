@@ -8,7 +8,6 @@
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 #define TARGET_FPS 60
-#define NUM_ENEMIES 5
 #define ENEMY_SPAWN_RADIUS 700
 
 class Projectile
@@ -201,6 +200,7 @@ class GameManager
 private:
     float waveTimer = 30.0f;
     int currentWave = 0;
+    int numOfEnemies = 5;
 
 public:
     void SpawnEnemies(Player& player, std::vector<Enemy>& enemies, int NUM_OF_WAVES)
@@ -208,9 +208,9 @@ public:
         waveTimer += GetFrameTime();
         if (waveTimer >= 30.0f && currentWave < NUM_OF_WAVES)
         {
-            for (int i = 0; i < NUM_ENEMIES; i++)
+            for (int i = 0; i < numOfEnemies; i++)
             {
-                float angle = i * (360.0f / NUM_ENEMIES) * DEG2RAD;
+                float angle = i * (360.0f / numOfEnemies) * DEG2RAD;
                 Vector2 spawnPosition = {
                     player.getPlayerPosition().x + cos(angle) * ENEMY_SPAWN_RADIUS,
                     player.getPlayerPosition().y + sin(angle) * ENEMY_SPAWN_RADIUS
@@ -219,13 +219,16 @@ public:
             }
 
             currentWave++;
+            numOfEnemies += 2;
             waveTimer = 0.0f;
             std::cout << "Wave " << currentWave << " of " << NUM_OF_WAVES << " has begun!" << std::endl;
+            std::cout << "Enemy Count: " << numOfEnemies << std::endl;
         }
     }
 
     int getCurrentWave() { return currentWave; }
     float getWaveTimer() { return waveTimer; }
+    int setNumOfEnemies(int amount) { return numOfEnemies = amount; }
 };
 
 class PowerUpManager
