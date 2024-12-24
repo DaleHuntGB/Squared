@@ -94,14 +94,14 @@ public:
     
     void DrawPlayer(Color playerColor)
     {
-        DrawRectangle(playerPosition.x, playerPosition.y, 32, 32, playerColor);
+        DrawCircle(playerPosition.x, playerPosition.y, 16, BLACK);
     }
 
     void Shoot()
     {
         Vector2 mousePosition = GetMousePosition();
         Vector2 direction = {mousePosition.x - playerPosition.x, mousePosition.y - playerPosition.y};
-        Vector2 projectileStartPosition = {playerPosition.x + 25, playerPosition.y + 25};
+        Vector2 projectileStartPosition = {playerPosition.x, playerPosition.y};
         projectiles.push_back(Projectile(projectileStartPosition, direction, 10));
     }
 
@@ -112,7 +112,7 @@ public:
             for (int i = 0; i < 360; i += 10)
             {
                 Vector2 direction = {cos(i * DEG2RAD), sin(i * DEG2RAD)};
-                Vector2 projectileStartPosition = {playerPosition.x + 25, playerPosition.y + 25};
+                Vector2 projectileStartPosition = {playerPosition.x, playerPosition.y};
                 projectiles.push_back(Projectile(projectileStartPosition, direction, 10));
             }
             burstCD = 30.0f;
@@ -344,6 +344,7 @@ int main()
     Player player(100, 5, {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2}, KEY_W, KEY_S, KEY_A, KEY_D, MOUSE_BUTTON_LEFT, projectiles);
     GameManager gameManager;
     PowerUpManager powerUpManager;
+    CollisionManager collisionManager;
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, windowTitle);
     SetTargetFPS(TARGET_FPS);
@@ -387,6 +388,8 @@ int main()
                 }
             }
         }
+
+        collisionManager.CheckBounds(player.getPlayerPosition(), SCREEN_WIDTH, SCREEN_HEIGHT);
 
         powerUpManager.DrawPowerUps();
         powerUpManager.CheckPowerUpCollision(player);
