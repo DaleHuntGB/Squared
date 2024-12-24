@@ -228,7 +228,6 @@ public:
 
     int getCurrentWave() { return currentWave; }
     float getWaveTimer() { return waveTimer; }
-    int setNumOfEnemies(int amount) { return numOfEnemies = amount; }
 };
 
 class PowerUpManager
