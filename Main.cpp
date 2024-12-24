@@ -110,7 +110,7 @@ public:
         {
             for (int i = 0; i < 360; i += 10)
             {
-                Vector2 direction = {cos(i * DEG2RAD), sin(i * DEG2RAD)};
+                Vector2 direction = {static_cast<float>(cos(i * DEG2RAD)), static_cast<float>(sin(i * DEG2RAD))};
                 Vector2 projectileStartPosition = {playerPosition.x, playerPosition.y};
                 projectiles.push_back(Projectile(projectileStartPosition, direction, 10));
             }
@@ -212,8 +212,8 @@ public:
             {
                 float angle = i * (360.0f / numOfEnemies) * DEG2RAD;
                 Vector2 spawnPosition = {
-                    player.getPlayerPosition().x + cos(angle) * ENEMY_SPAWN_RADIUS,
-                    player.getPlayerPosition().y + sin(angle) * ENEMY_SPAWN_RADIUS
+                    player.getPlayerPosition().x + static_cast<float>(cos(angle)) * ENEMY_SPAWN_RADIUS,
+                    player.getPlayerPosition().y + static_cast<float>(sin(angle)) * ENEMY_SPAWN_RADIUS
                 };
                 enemies.emplace_back(100, 2, spawnPosition);
             }
@@ -252,7 +252,9 @@ private:
 public:
     void SpawnPowerUp(int powerUpType)
     {
-        PowerUp newPowerUp = {powerUpType, {GetRandomValue(0, SCREEN_WIDTH), GetRandomValue(0, SCREEN_HEIGHT)}, true};
+        PowerUp newPowerUp = {powerUpType, 
+            {static_cast<float>(GetRandomValue(0, SCREEN_WIDTH)), static_cast<float>(GetRandomValue(0, SCREEN_HEIGHT))}, 
+            true};
         positionalPowerUps.push_back(newPowerUp);
     }
 
@@ -343,7 +345,7 @@ int main()
     const char* windowTitle = "LoopLoop";
     std::vector<Projectile> projectiles;
     std::vector<Enemy> enemies;
-    Player player(100, 5, {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2}, KEY_W, KEY_S, KEY_A, KEY_D, MOUSE_BUTTON_LEFT, projectiles);
+    Player player(100, 5, {SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f}, KEY_W, KEY_S, KEY_A, KEY_D, MOUSE_BUTTON_LEFT, projectiles);
     GameManager gameManager;
     PowerUpManager powerUpManager;
     CollisionManager collisionManager;
@@ -399,15 +401,15 @@ int main()
 
         std::string playerScoreText = "Score: " + std::to_string(player.updatePlayerScore(0));
         int playerScoreTextWidth = MeasureText(playerScoreText.c_str(), 20);
-        Vector2 scorePosition = {SCREEN_WIDTH / 2 - playerScoreTextWidth / 2, 10};
+        Vector2 scorePosition = {static_cast<float>(SCREEN_WIDTH / 2 - playerScoreTextWidth / 2), 10.0f};
         DrawText(playerScoreText.c_str(), scorePosition.x, scorePosition.y, 20, BLACK);
 
         std::string waveText = "Current Wave: " + std::to_string(gameManager.getCurrentWave());
         std::string waveTimerText = "Next Wave: " + std::to_string(static_cast<int>(ceil(gameManager.getWaveTimer())));
         int waveTextWidth = MeasureText(waveText.c_str(), 20);
         int waveTimerTextWidth = MeasureText(waveTimerText.c_str(), 20);
-        Vector2 wavePosition = {SCREEN_WIDTH / 2 - waveTextWidth - 10, 40};
-        Vector2 waveTimerPosition = {SCREEN_WIDTH / 2 + 10, 40};
+        Vector2 wavePosition = {static_cast<float>(SCREEN_WIDTH / 2 - waveTextWidth - 10), 40.0f};
+        Vector2 waveTimerPosition = {static_cast<float>(SCREEN_WIDTH / 2 + 10), 40.0f};
 
         DrawText(waveText.c_str(), wavePosition.x, wavePosition.y, 20, BLACK);
         DrawText(waveTimerText.c_str(), waveTimerPosition.x, waveTimerPosition.y, 20, BLACK);
@@ -418,7 +420,7 @@ int main()
         // to help with centering / positioning.
         std::string playerHealthText = "Health: " + std::to_string(player.getPlayerHealth());
         int playerHealthTextWidth = MeasureText(playerHealthText.c_str(), 20);
-        Vector2 textPosition = {SCREEN_WIDTH / 2 - playerHealthTextWidth / 2, SCREEN_HEIGHT - 30};
+        Vector2 textPosition = {static_cast<float>(SCREEN_WIDTH / 2 - playerHealthTextWidth / 2), static_cast<float>(SCREEN_HEIGHT - 30)};
         DrawText(playerHealthText.c_str(), textPosition.x, textPosition.y, 20, BLACK);
 
         EndDrawing();
