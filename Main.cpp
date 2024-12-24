@@ -395,9 +395,21 @@ int main()
         powerUpManager.CheckPowerUpCollision(player);
         powerUpManager.UpdatePowerUpTimers(player);
 
-        DrawText(("Score: " + std::to_string(player.updatePlayerScore(0))).c_str(), 10, 10, 20, BLACK);
-        DrawText(("Wave: " + std::to_string(gameManager.getCurrentWave())).c_str(), 10, 40, 20, BLACK);
-        DrawText(("Wave Timer: " + std::to_string(static_cast<int>(ceil(gameManager.getWaveTimer())))).c_str(), 10, 70, 20, BLACK);
+        std::string playerScoreText = "Score: " + std::to_string(player.updatePlayerScore(0));
+        int playerScoreTextWidth = MeasureText(playerScoreText.c_str(), 20);
+        Vector2 scorePosition = {SCREEN_WIDTH / 2 - playerScoreTextWidth / 2, 10};
+        DrawText(playerScoreText.c_str(), scorePosition.x, scorePosition.y, 20, BLACK);
+
+        std::string waveText = "Current Wave: " + std::to_string(gameManager.getCurrentWave());
+        std::string waveTimerText = "Next Wave: " + std::to_string(static_cast<int>(ceil(gameManager.getWaveTimer())));
+        int waveTextWidth = MeasureText(waveText.c_str(), 20);
+        int waveTimerTextWidth = MeasureText(waveTimerText.c_str(), 20);
+        Vector2 wavePosition = {SCREEN_WIDTH / 2 - waveTextWidth - 10, 40};
+        Vector2 waveTimerPosition = {SCREEN_WIDTH / 2 + 10, 40};
+
+        DrawText(waveText.c_str(), wavePosition.x, wavePosition.y, 20, BLACK);
+        DrawText(waveTimerText.c_str(), waveTimerPosition.x, waveTimerPosition.y, 20, BLACK);
+
         if (player.getBurstCD() > 0.0f) { DrawText(("Burst CD: " + std::to_string(static_cast<int>(ceil(player.getBurstCD())))).c_str(), 10, 100, 20, RED); }
         else { DrawText("Burst: Ready!", 10, 100, 20, GREEN); }
         // Store Player Health as a variable so that we can measure the text
