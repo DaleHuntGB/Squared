@@ -22,4 +22,5 @@ The game is aimed to be an endless runner where the player can wrap around the g
 
 | Asset Name       | Description           | Image                        |
 |------------------|-----------------------|----------------------------------|
-| Player Character | Player Character Sprite | [Player Character](/Resources/Assets/Player.png)     |
+| Player Character | Player Character Sprite | ![Player Character](/Resources/Assets/Player.png)|
+| Enemy Character | Enemy Character Sprite | ![Enemy Character](/Resources/Assets/Enemy.png)
