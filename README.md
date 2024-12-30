@@ -19,7 +19,7 @@ The game is aimed to be an endless runner where the player can wrap around the g
 - Seperate into Header / CPP Files.
 - Enemies Attack Player.
 - Player Health Bar.
-- Enemy Waves.
+- Enemy Waves & Timer.
 - Different Projectiles.
 
 # 🖌️ Assets
