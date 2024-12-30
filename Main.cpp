@@ -1,435 +1,294 @@
-#include <iostream>
 #include <raylib.h>
-#include <string>
-#include <vector>
+#include <iostream>
 #include <cmath>
+#include <vector>
 #include <algorithm>
 
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 720
+#define SCREEN_WIDTH 640
+#define SCREEN_HEIGHT 640
+#define WINDOW_TITLE "Squared"
 #define TARGET_FPS 60
-#define ENEMY_SPAWN_RADIUS 700
 
-class Projectile
+
+class TextureManager
 {
-private:
+public:
+    static inline Texture2D playerTexture;
+    static inline Texture2D enemyTexture;
+
+    static void LoadTextures()
+    {
+        playerTexture = LoadTexture("Resources/Assets/Player.png");
+        enemyTexture = LoadTexture("Resources/Assets/Enemy.png");
+    }
+};
+
+void SetupGameWindow()
+{
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE);
+    SetTargetFPS(TARGET_FPS);
+    TextureManager::LoadTextures();
+}
+
+class Projectile 
+{
+protected:
     Vector2 projectilePosition;
     Vector2 projectileDirection;
     int projectileSpeed;
-
+    int projectileDamage;
+    int projectileSize;
+    bool isActive;
 public:
-    Projectile(Vector2 startPosition, Vector2 direction, int speed) : projectilePosition(startPosition), projectileDirection(direction), projectileSpeed(speed)
+    Projectile(Vector2 position, Vector2 direction, int speed, int damage, int size) : projectilePosition(position), projectileDirection(direction), projectileSpeed(speed), projectileDamage(damage), projectileSize(size), isActive(true) {}
+
+    void Update()
     {
-        float magnitude = sqrt(direction.x * direction.x + direction.y * direction.y);
-        projectileDirection.x /= magnitude;
-        projectileDirection.y /= magnitude;
+        if (isActive)
+        {
+            projectilePosition.x += projectileDirection.x * projectileSpeed;
+            projectilePosition.y += projectileDirection.y * projectileSpeed;
+            if (projectilePosition.x < 0 || projectilePosition.x > SCREEN_WIDTH || projectilePosition.y < 0 || projectilePosition.y > SCREEN_HEIGHT) { isActive = false; }
+        }
     }
 
-    void MoveProjectile()
+    void Draw()
     {
-        projectilePosition.x += projectileDirection.x * projectileSpeed;
-        projectilePosition.y += projectileDirection.y * projectileSpeed;
+        if (isActive) { DrawCircle(projectilePosition.x, projectilePosition.y, projectileSize, GREEN); }
     }
 
-    void DrawProjectile()
+    static void Shoot(std::vector<Projectile>& projectileObjects, Vector2 startPosition, Vector2 targetPosition, int speed, int damage, int size)
     {
-        DrawCircle(projectilePosition.x, projectilePosition.y, 10, BLACK);
-    }
+        Vector2 projectileDirection = { targetPosition.x - startPosition.x, targetPosition.y - startPosition.y };
+        float projectileMagnitude = sqrt(projectileDirection.x * projectileDirection.x + projectileDirection.y * projectileDirection.y);
 
-    Vector2 getPosition() const { return projectilePosition; }
+        if (projectileMagnitude > 0)
+        {
+            projectileDirection.x /= projectileMagnitude;
+            projectileDirection.y /= projectileMagnitude;
+        }
+
+        projectileObjects.emplace_back(startPosition, projectileDirection, speed, damage, size);
+    }
+    bool IsActive() const { return isActive; }
+    Vector2 GetPosition() const { return projectilePosition; }
+    int GetDamage() const { return projectileDamage; }
 };
 
-class Player
+class Entity
 {
-private:
-    int playerHealth;
-    int playerSpeed;
-    int playerScore = 0;
-    int playerDamage = 10;
-    Vector2 playerPosition;
-    float burstCD = 0.0f;
-    float cooldownSpeed = 1.0f;
-
-    int moveUp;
-    int moveDown;
-    int moveLeft;
-    int moveRight;
-    int shoot;
-
-    std::vector<Projectile> &projectiles;
-
 public:
-    Player(int playerHealth, int playerSpeed, Vector2 playerPosition, int moveUp, int moveDown, int moveLeft, int moveRight, int Shoot, std::vector<Projectile> &projectiles, int playerScore = 0, int playerDamage = 10) 
-    : playerHealth(playerHealth), playerSpeed(playerSpeed), playerPosition(playerPosition), moveUp(moveUp), moveDown(moveDown), moveLeft(moveLeft), moveRight(moveRight), shoot(Shoot), projectiles(projectiles), playerDamage(playerDamage) {}
+    virtual void Draw() = 0;
 
-    void movePlayer()
-    {
-        Vector2 direction = {0.0f, 0.0f};
+    int GetHealth() { return entityHealth; }
+    void SetHealth(int health) { entityHealth = health; }
 
-        if (IsKeyDown(moveUp)) direction.y -= 1;
-        if (IsKeyDown(moveDown)) direction.y += 1;
-        if (IsKeyDown(moveLeft)) direction.x -= 1;
-        if (IsKeyDown(moveRight)) direction.x += 1;
+    int GetSpeed() { return entitySpeed; }
+    void SetSpeed(int speed) { entitySpeed = speed; }
 
-        float magnitude = sqrt(direction.x * direction.x + direction.y * direction.y);
-        if (magnitude > 0.0f)
-        {
-            direction.x /= magnitude;
-            direction.y /= magnitude;
-        }
+    int GetDamage() { return entityDamage; }
+    void SetDamage(int damage) { entityDamage = damage; }
 
-        playerPosition.x += direction.x * playerSpeed;
-        playerPosition.y += direction.y * playerSpeed;
+    int GetCollisionDamage() { return entityCollisionDamage; }
+    void SetCollisionDamage(int damage) { entityCollisionDamage = damage; }
 
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || IsKeyPressed(KEY_SPACE))
-        {
-            Shoot();
-        }
-        if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
-        {
-            Burst();
-        }
-    }
-    
-    void DrawPlayer(Color playerColor)
-    {
-        DrawCircle(playerPosition.x, playerPosition.y, 16, BLACK);
-    }
+    int GetSize() { return entitySize; }
+    void SetSize(int size) { entitySize = size; }
 
-    void Shoot()
-    {
-        Vector2 mousePosition = GetMousePosition();
-        Vector2 direction = {mousePosition.x - playerPosition.x, mousePosition.y - playerPosition.y};
-        Vector2 projectileStartPosition = {playerPosition.x, playerPosition.y};
-        projectiles.push_back(Projectile(projectileStartPosition, direction, 10));
-    }
+    Vector2 GetPosition() { return entityPosition; }
+    void SetPosition(Vector2 position) { entityPosition = position; }
 
-    void Burst()
-    {
-        if (burstCD <= 0.0f)
-        {
-            for (int i = 0; i < 360; i += 10)
-            {
-                Vector2 direction = {static_cast<float>(cos(i * DEG2RAD)), static_cast<float>(sin(i * DEG2RAD))};
-                Vector2 projectileStartPosition = {playerPosition.x, playerPosition.y};
-                projectiles.push_back(Projectile(projectileStartPosition, direction, 10));
-            }
-            burstCD = 30.0f;
-        }
-    }
-
-    void UpdateBurstCD()
-    {
-        if (burstCD > 0.0f)
-        {
-            burstCD -= GetFrameTime();
-            if (burstCD < 0.0f) burstCD = 0.0f;
-        }
-    }
-
-    float getBurstCD() const { return burstCD; }
-    void setBurstCD(float value) { burstCD = value; }
-    Vector2& getPlayerPosition() { return playerPosition; }
-    int updatePlayerScore(int amount) { return playerScore += amount; }
-    int getPlayerHealth() const { return playerHealth; }
-    void decreaseHealth(int amount) { playerHealth -= amount; }
-    int getPlayerDamage() const { return playerDamage; }
-    void setPlayerDamage(int amount) { playerDamage = amount; }
-    int getPlayerSpeed() const { return playerSpeed; }
-    void setPlayerSpeed(int amount) { playerSpeed = amount; }
+protected:
+    int entityHealth = 100;
+    int entitySpeed = 5;
+    int entityDamage = 10;
+    int entityCollisionDamage = 25;
+    int entitySize = 32;
+    Vector2 entityPosition = {0, 0};
 };
 
-class Enemy
+class Player : public Entity
 {
-private:
-    int enemyHealth;
-    int enemySpeed;
-    Vector2 enemyPosition;
 public:
-    Enemy(int enemyHealth, int enemySpeed, Vector2 enemyPosition) : enemyHealth(enemyHealth), enemySpeed(enemySpeed), enemyPosition(enemyPosition) {}
+    void Draw() override { 
+        DrawTextureEx(TextureManager::playerTexture, entityPosition, 0, 1, WHITE); 
+        }
 
-    void MoveEnemy(Vector2 playerPosition)
+    void Move(std::vector<Projectile>& projectileObjects)
     {
-        Vector2 direction = {playerPosition.x - enemyPosition.x, playerPosition.y - enemyPosition.y};
-        float magnitude = sqrt(direction.x * direction.x + direction.y * direction.y);
-        direction.x /= magnitude;
-        direction.y /= magnitude;
-        enemyPosition.x += direction.x * enemySpeed;
-        enemyPosition.y += direction.y * enemySpeed;
-    }
+        if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) entityPosition.x += entitySpeed;
+        if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) entityPosition.x -= entitySpeed;
+        if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)) entityPosition.y -= entitySpeed;
+        if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)) entityPosition.y += entitySpeed;
+        if (IsKeyPressed(KEY_SPACE)) 
+        {
+            Vector2 mousePosition = GetMousePosition();
+            Projectile::Shoot(projectileObjects, entityPosition, mousePosition, 10, 20, 5);
+        }
 
-    void DrawEnemy(Color enemyColor)
-    {
-        DrawRectangle(enemyPosition.x, enemyPosition.y, 32, 32, enemyColor);
-        DrawRectangle(enemyPosition.x, enemyPosition.y - 10, 32, 5, RED);
-        DrawRectangle(enemyPosition.x, enemyPosition.y - 10, 32 * (enemyHealth / 100.0f), 5, GREEN);
-    }
+        if (IsKeyPressed(KEY_F))
+        {
+            std::cout << "Size: " << entitySize << std::endl;
+        }
 
-    Vector2 getEnemyPosition() const { return enemyPosition; }
-    int getEnemyHealth() { return enemyHealth; }
-    void decreaseHealth(int amount)
-    {
-        enemyHealth -= amount;
-        if (enemyHealth < 0)
-            enemyHealth = 0;
+        if (entityPosition.x > SCREEN_WIDTH) entityPosition.x = 0;
+        if (entityPosition.x < 0) entityPosition.x = SCREEN_WIDTH;
+        if (entityPosition.y > SCREEN_HEIGHT) entityPosition.y = 0;
+        if (entityPosition.y < 0) entityPosition.y = SCREEN_HEIGHT;
     }
-
-    bool isDead() const { return enemyHealth <= 0; }
 };
 
-class CollisionManager
+class Enemy : public Entity
 {
 public:
-    static bool CheckCollision(Vector2 position1, Vector2 position2, float radius1, float radius2)
+    void Draw() override { DrawTextureEx(TextureManager::enemyTexture, entityPosition, 0, 1, WHITE); }
+    void Move(Vector2 playerPosition)
     {
-        float distance = sqrt(pow(position2.x - position1.x, 2) + pow(position2.y - position1.y, 2));
-        return distance < radius1 + radius2;
-    }
+        Vector2 direction = {playerPosition.x - entityPosition.x, playerPosition.y - entityPosition.y};
+        float distance = sqrt(direction.x * direction.x + direction.y * direction.y);
 
-    static void CheckBounds(Vector2 &position, int width, int height)
+        if (distance > 0)
+        {
+            direction.x /= distance;
+            direction.y /= distance;
+            entityPosition.x += direction.x * entitySpeed;
+            entityPosition.y += direction.y * entitySpeed;
+        }
+    }
+};
+
+class FontManager
+{
+public:
+    static inline Font displayFont;
+    static inline Font scoreFont;
+    static inline Font healthFont;
+    static void UnloadFonts()
     {
-        if (position.x < 0) position.x = width;
-        if (position.x > width) position.x = 0;
-        if (position.y < 0) position.y = height;
-        if (position.y > height) position.y = 0;
+        UnloadFont(displayFont);
+        UnloadFont(scoreFont);
+        UnloadFont(healthFont);
     }
 };
 
 class GameManager
 {
-private:
-    float waveTimer = 30.0f;
-    int currentWave = 0;
-    int numOfEnemies = 5;
-
 public:
-    void SpawnEnemies(Player& player, std::vector<Enemy>& enemies, int NUM_OF_WAVES)
+    static void StartGame()
     {
-        waveTimer += GetFrameTime();
-        if (waveTimer >= 30.0f && currentWave < NUM_OF_WAVES)
+        ClearBackground(RAYWHITE);
+        if (PC.GetHealth() <= 0)
         {
-            for (int i = 0; i < numOfEnemies; i++)
-            {
-                float angle = i * (360.0f / numOfEnemies) * DEG2RAD;
-                Vector2 spawnPosition = {
-                    player.getPlayerPosition().x + static_cast<float>(cos(angle)) * ENEMY_SPAWN_RADIUS,
-                    player.getPlayerPosition().y + static_cast<float>(sin(angle)) * ENEMY_SPAWN_RADIUS
-                };
-                enemies.emplace_back(100, 2, spawnPosition);
-            }
-
-            currentWave++;
-            numOfEnemies += 2;
-            waveTimer = 0.0f;
-            std::cout << "Wave " << currentWave << " of " << NUM_OF_WAVES << " has begun!" << std::endl;
-            std::cout << "Enemy Count: " << numOfEnemies << std::endl;
+            isGameRunning = false;
+            char* gameOverText = "GAME OVER!\nPress R to Restart\nQ to Quit";
+            float textWidth = MeasureTextEx(FontManager::displayFont, gameOverText, 24, 0).x;
+            float textHeight = MeasureTextEx(FontManager::displayFont, gameOverText, 24, 0).y;
+            float textPosX = (SCREEN_WIDTH / 2) - textWidth / 2;
+            float textPosY = SCREEN_HEIGHT / 2 - textHeight / 2;
+            DrawTextEx(FontManager::displayFont, gameOverText, {textPosX, textPosY}, 24, 0, RED);
+            HandleUserInput();
+            return;
+        }
+        else
+        {
+            Update();
         }
     }
 
-    int getCurrentWave() { return currentWave; }
-    float getWaveTimer() { return waveTimer; }
-};
+    static void ManageUnits()
+    {
+        for (auto& enemy : enemyUnits)
+        {
+            enemy.Draw();
+            enemy.Move(PC.GetPosition());
+        }
 
-class PowerUpManager
-{
+        for (auto& projectile : projectileObjects)
+        {
+            projectile.Update();
+            projectile.Draw();
+        }
+
+        projectileObjects.erase(std::remove_if(projectileObjects.begin(), projectileObjects.end(), [](const Projectile& p) { return !p.IsActive(); }), projectileObjects.end());
+    }
+
+    static void Update()
+    {
+        PC.Draw();
+        PC.Move(projectileObjects);
+        ManageUnits();
+        HandleCollision();
+        DrawTextEx(FontManager::healthFont, ("Health: " + std::to_string(PC.GetHealth())).c_str(), {10, 10}, 24, 0, BLACK);
+    }
+
+    static void HandleCollision()
+    {
+        for (int i = 0; i < enemyUnits.size(); i++)
+        {
+            if (CheckCollisionRecs( {PC.GetPosition().x, PC.GetPosition().y, (float)PC.GetSize(), (float)PC.GetSize()}, {enemyUnits[i].GetPosition().x, enemyUnits[i].GetPosition().y, (float)enemyUnits[i].GetSize(), (float)enemyUnits[i].GetSize()}))
+            {
+                PC.SetHealth(PC.GetHealth() - enemyUnits[i].GetCollisionDamage());
+                enemyUnits.erase(enemyUnits.begin() + i);
+                i--;
+            }
+        }
+    }
+
+    static void Initialize()
+    {
+        isGameRunning = true;
+        gameShouldClose = false;
+        FontManager::displayFont = LoadFont("Resources/Fonts/DisplayFont.ttf");
+        FontManager::scoreFont = LoadFont("Resources/Fonts/ScoreFont.otf");
+        FontManager::healthFont = LoadFont("Resources/Fonts/ScoreFont.otf");
+        PC.SetHealth(100);
+        PC.SetSpeed(5);
+        PC.SetPosition({SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2});
+        enemyUnits.clear();
+
+        for (int i = 0; i < numEnemies; i++)
+        {
+            Enemy enemy;
+            enemy.SetPosition({(float)GetRandomValue(0, SCREEN_WIDTH), (float)GetRandomValue(0, SCREEN_HEIGHT)});
+            enemy.SetSpeed(3);
+            enemyUnits.push_back(enemy);
+        }
+    }
+
+    static void HandleUserInput()
+    {
+        if (IsKeyPressed(KEY_Q) || IsKeyPressed(KEY_ESCAPE)) gameShouldClose = true;
+        if (IsKeyPressed(KEY_R)) Restart();
+    }
+
+    static void Restart()
+    {
+        Initialize();
+    }
+
+    static bool GameShouldClose() { return gameShouldClose; }
+
 private:
-    struct PowerUp
-    {
-        int type;
-        Vector2 position;
-        bool active;
-    };
-
-    struct ActivePowerUp
-    {
-        int type;
-        float remainingTime;
-    };
-
-    std::vector<PowerUp> positionalPowerUps;
-    std::vector<ActivePowerUp> activePowerUps;
-
-public:
-    void SpawnPowerUp(int powerUpType)
-    {
-        PowerUp newPowerUp = {powerUpType, 
-            {static_cast<float>(GetRandomValue(0, SCREEN_WIDTH)), static_cast<float>(GetRandomValue(0, SCREEN_HEIGHT))}, 
-            true};
-        positionalPowerUps.push_back(newPowerUp);
-    }
-
-    void DrawPowerUps()
-    {
-        for (const auto& powerUp : positionalPowerUps)
-        {
-            if (!powerUp.active) continue;
-
-            Color color;
-            switch (powerUp.type)
-            {
-            case 0: color = GREEN; break;
-            case 1: color = YELLOW; break;
-            case 2: color = RED; break;
-            case 3: color = BLUE; break;
-            default: color = GRAY; break;
-            }
-
-            DrawCircle(powerUp.position.x, powerUp.position.y, 10, color);
-        }
-    }
-
-    void CheckPowerUpCollision(Player& player)
-    {
-        for (auto& powerUp : positionalPowerUps)
-        {
-            if (!powerUp.active) continue;
-
-            if (CollisionManager::CheckCollision(player.getPlayerPosition(), powerUp.position, 16, 10))
-            {
-                powerUp.active = false;
-                StartPowerUpTimer(player, powerUp.type);
-            }
-        }
-    }
-
-    void StartPowerUpTimer(Player& player, int powerUpType)
-    {
-        float duration = 10.0f;
-        ApplyPowerUp(player, powerUpType);
-        activePowerUps.push_back({powerUpType, duration});
-    }
-
-    void UpdatePowerUpTimers(Player& player)
-    {
-        for (size_t i = 0; i < activePowerUps.size();)
-        {
-            ActivePowerUp& powerUp = activePowerUps[i];
-            powerUp.remainingTime -= GetFrameTime();
-
-            if (powerUp.remainingTime <= 0.0f)
-            {
-                RevertPowerUp(player, powerUp.type);
-                activePowerUps.erase(activePowerUps.begin() + i);
-            }
-            else
-            {
-                ++i;
-            }
-        }
-    }
-
-    void ApplyPowerUp(Player& player, int powerUpType)
-    {
-        switch (powerUpType)
-        {
-        case 0: break;
-        case 1: player.setPlayerSpeed(player.getPlayerSpeed() + 2); break;
-        case 2: player.setPlayerDamage(20); break;
-        case 3: player.setBurstCD(0.0f); break;
-        }
-    }
-
-    void RevertPowerUp(Player& player, int powerUpType)
-    {
-        switch (powerUpType)
-        {
-        case 1: player.setPlayerSpeed(player.getPlayerSpeed() - 2); break;
-        case 2: player.setPlayerDamage(10); break;
-        case 3: break;
-        }
-    }
+    static inline Player PC;
+    static inline std::vector<Enemy> enemyUnits;
+    static inline std::vector<Projectile> projectileObjects;
+    static inline bool isGameRunning = true;
+    static inline bool gameShouldClose = false;
+    static inline int numEnemies = 5;
 };
 
 int main()
 {
-    const char* windowTitle = "LoopLoop";
-    std::vector<Projectile> projectiles;
-    std::vector<Enemy> enemies;
-    Player player(100, 5, {SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f}, KEY_W, KEY_S, KEY_A, KEY_D, MOUSE_BUTTON_LEFT, projectiles);
-    GameManager gameManager;
-    PowerUpManager powerUpManager;
-    CollisionManager collisionManager;
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, windowTitle);
-    Image playerSpriteImage = LoadImage("Assets/PlayerSprite.png");
-    Texture2D playerSprite = LoadTextureFromImage(playerSpriteImage);
-    SetTargetFPS(TARGET_FPS);
+    SetupGameWindow();
+    GameManager::Initialize();
 
-    while (!WindowShouldClose())
+    while (!WindowShouldClose() && !GameManager::GameShouldClose())
     {
         BeginDrawing();
-        ClearBackground(GRAY);
-
-        player.movePlayer();
-        player.UpdateBurstCD();
-        // player.DrawPlayer(BLACK);
-        DrawTextureEx(playerSprite, {player.getPlayerPosition().x - playerSprite.width / 2, player.getPlayerPosition().y - playerSprite.height / 2}, 0.0f, 1.0f, WHITE);
-
-        gameManager.SpawnEnemies(player, enemies, 5);
-        for (Enemy& enemy : enemies)
-        {
-            enemy.MoveEnemy(player.getPlayerPosition());
-            enemy.DrawEnemy(RED);
-        }
-
-        for (size_t i = 0; i < projectiles.size(); i++)
-        {
-            projectiles[i].MoveProjectile();
-            projectiles[i].DrawProjectile();
-        }
-
-        for (size_t i = 0; i < projectiles.size(); i++)
-        {
-            for (size_t j = 0; j < enemies.size(); j++)
-            {
-                if (CollisionManager::CheckCollision(projectiles[i].getPosition(), enemies[j].getEnemyPosition(), 10, 16))
-                {
-                    enemies[j].decreaseHealth(player.getPlayerDamage());
-                    projectiles.erase(projectiles.begin() + i);
-                    if (enemies[j].isDead())
-                    {
-                        enemies.erase(enemies.begin() + j);
-                        player.updatePlayerScore(10);
-                        powerUpManager.SpawnPowerUp(GetRandomValue(0, 3));
-                    }
-                }
-            }
-        }
-
-        collisionManager.CheckBounds(player.getPlayerPosition(), SCREEN_WIDTH, SCREEN_HEIGHT);
-
-        powerUpManager.DrawPowerUps();
-        powerUpManager.CheckPowerUpCollision(player);
-        powerUpManager.UpdatePowerUpTimers(player);
-
-        std::string playerScoreText = "Score: " + std::to_string(player.updatePlayerScore(0));
-        int playerScoreTextWidth = MeasureText(playerScoreText.c_str(), 20);
-        Vector2 scorePosition = {static_cast<float>(SCREEN_WIDTH / 2 - playerScoreTextWidth / 2), 10.0f};
-        DrawText(playerScoreText.c_str(), scorePosition.x, scorePosition.y, 20, BLACK);
-
-        std::string waveText = "Current Wave: " + std::to_string(gameManager.getCurrentWave());
-        std::string waveTimerText = "Next Wave: " + std::to_string(static_cast<int>(ceil(gameManager.getWaveTimer())));
-        int waveTextWidth = MeasureText(waveText.c_str(), 20);
-        int waveTimerTextWidth = MeasureText(waveTimerText.c_str(), 20);
-        Vector2 wavePosition = {static_cast<float>(SCREEN_WIDTH / 2 - waveTextWidth - 10), 40.0f};
-        Vector2 waveTimerPosition = {static_cast<float>(SCREEN_WIDTH / 2 + 10), 40.0f};
-
-        DrawText(waveText.c_str(), wavePosition.x, wavePosition.y, 20, BLACK);
-        DrawText(waveTimerText.c_str(), waveTimerPosition.x, waveTimerPosition.y, 20, BLACK);
-
-        if (player.getBurstCD() > 0.0f) { DrawText(("Burst CD: " + std::to_string(static_cast<int>(ceil(player.getBurstCD())))).c_str(), 10, 100, 20, RED); }
-        else { DrawText("Burst: Ready!", 10, 100, 20, GREEN); }
-        // Store Player Health as a variable so that we can measure the text
-        // to help with centering / positioning.
-        std::string playerHealthText = "Health: " + std::to_string(player.getPlayerHealth());
-        int playerHealthTextWidth = MeasureText(playerHealthText.c_str(), 20);
-        Vector2 textPosition = {static_cast<float>(SCREEN_WIDTH / 2 - playerHealthTextWidth / 2), static_cast<float>(SCREEN_HEIGHT - 30)};
-        DrawText(playerHealthText.c_str(), textPosition.x, textPosition.y, 20, BLACK);
-
+        GameManager::StartGame();
         EndDrawing();
     }
-
-    UnloadImage(playerSpriteImage);
-    UnloadTexture(playerSprite);
+    FontManager::UnloadFonts();
     CloseWindow();
     return 0;
 }

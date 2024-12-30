@@ -3,7 +3,7 @@ CXX = g++
 
 # Source and output
 SRC = Main.cpp
-OUT = Main
+OUT = Squared
 
 # Libraries
 LIBS = -lraylib -lGL -lm -ldl -pthread
