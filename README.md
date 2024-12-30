@@ -18,7 +18,6 @@ The game is aimed to be an endless runner where the player can wrap around the g
 - Different Projectiles.
 
 # 🖌️ Assets
-- All assets are created by myself.
 
 <table align="center">
   <tr>
