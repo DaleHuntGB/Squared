@@ -20,8 +20,8 @@ The game is aimed to be an endless runner where the player can wrap around the g
 # 🖌️ Assets
 - All assets are created by myself.
 
-### Player Character
+- Player Character
 ![Player Character](Resources/Assets/Player.png)
 
-### Enemy Character
+- Enemy Character
 ![Enemy Character](Resources/Assets/Enemy.png)
