@@ -1,6 +1,6 @@
-# 📌 LoopLoop
+# 📌 Squared
 
-LoopLoop is a WIP Private Project that will be solely developed by myself. The aim is to create a project that helps me gain familiarity / comfort with C++, RayLib and Make. Make is primarily used to help with ease of compilation on Linux. 
+Squared is a WIP Private Project that will be solely developed by myself. The aim is to create a project that helps me gain familiarity / comfort with C++, RayLib and Make. Make is primarily used to help with ease of compilation on Linux. 
 
 The game is aimed to be an endless runner where the player can wrap around the game window. The idea is to kill enemies, score points and survive as long as possible.
 
@@ -16,4 +16,3 @@ The game is aimed to be an endless runner where the player can wrap around the g
 - Player Health Bar.
 - Enemy Waves.
 - Different Projectiles.
-
