@@ -20,7 +20,17 @@ The game is aimed to be an endless runner where the player can wrap around the g
 # 🖌️ Assets
 - All assets are created by myself.
 
-| Asset Name       | Description           | Image                        |
-|------------------|-----------------------|----------------------------------|
-| Player Character | Player Character Sprite | ![Player Character](/Resources/Assets/Player.png)|
-| Enemy Character | Enemy Character Sprite | ![Enemy Character](/Resources/Assets/Enemy.png)
+<table align="center">
+  <tr>
+    <th style="text-align:center;">Asset Name</th>
+    <th style="text-align:center;">Image</th>
+  </tr>
+  <tr>
+    <td style="text-align:center;">Player Character</td>
+    <td style="text-align:center;"><img src="/Resources/Assets/Player.png" alt="Player Character" width="100"></td>
+  </tr>
+  <tr>
+    <td style="text-align:center;">Enemy Character</td>
+    <td style="text-align:center;"><img src="/Resources/Assets/Enemy.png" alt="Enemy Character" width="100"></td>
+  </tr>
+</table>
