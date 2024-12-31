@@ -15,13 +15,19 @@ class TextureManager
 public:
     static inline Texture2D playerTexture;
     static inline Texture2D enemyTexture;
-    static inline Texture2D bulletTexture;
+    static inline Texture2D projectileTexture;
+    static inline Texture2D healthTexture;
+    static inline Texture2D powerUpTexture;
+    static inline Texture2D lifeTexture;
 
     static void LoadTextures()
     {
         playerTexture = LoadTexture("Resources/Assets/Player.png");
         enemyTexture = LoadTexture("Resources/Assets/Enemy.png");
-        bulletTexture = LoadTexture("Resources/Assets/Bullet.png");
+        projectileTexture = LoadTexture("Resources/Assets/Projectile.png");
+        healthTexture = LoadTexture("Resources/Assets/Health.png");
+        powerUpTexture = LoadTexture("Resources/Assets/PowerUp.png");
+        lifeTexture = LoadTexture("Resources/Assets/Life.png");
     }
 };
 
@@ -56,7 +62,7 @@ public:
 
     void Draw()
     {
-        if (isActive) { DrawTextureEx(TextureManager::bulletTexture, projectilePosition, 0, 1, WHITE); }
+        if (isActive) { DrawTextureEx(TextureManager::projectileTexture, projectilePosition, 0, 1, WHITE); }
     }
 
     static void Shoot(std::vector<Projectile>& projectileObjects, Vector2 startPosition, Vector2 targetPosition, int speed, int damage, int size)

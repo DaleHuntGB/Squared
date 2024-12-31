@@ -17,6 +17,7 @@ The game is aimed to be an endless runner where the player can wrap around the g
 # 🔧 TODO
 
 - Seperate into Header / CPP Files.
+  - `static inline` will be corrected with this. I need to read more about the benefits.
 - Enemies Attack Player.
 - Player Health Bar.
 - Enemy Waves & Timer.
