@@ -29,6 +29,16 @@ public:
         powerUpTexture = LoadTexture("Resources/Assets/PowerUp.png");
         lifeTexture = LoadTexture("Resources/Assets/Life.png");
     }
+
+    static void UnloadTextures()
+    {
+        UnloadTexture(playerTexture);
+        UnloadTexture(enemyTexture);
+        UnloadTexture(projectileTexture);
+        UnloadTexture(healthTexture);
+        UnloadTexture(powerUpTexture);
+        UnloadTexture(lifeTexture);
+    }
 };
 
 void SetupGameWindow()
@@ -285,18 +295,23 @@ private:
     static inline int numEnemies = 5;
 };
 
+void CleanUp()
+{
+    FontManager::UnloadFonts();
+    TextureManager::UnloadTextures();
+    CloseWindow();
+}
+
 int main()
 {
     SetupGameWindow();
     GameManager::Initialize();
-
     while (!WindowShouldClose() && !GameManager::GameShouldClose())
     {
         BeginDrawing();
         GameManager::StartGame();
         EndDrawing();
     }
-    FontManager::UnloadFonts();
-    CloseWindow();
+    CleanUp();
     return 0;
 }
