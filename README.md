@@ -39,8 +39,8 @@ The game is aimed to be an endless runner where the player can wrap around the g
     <td style="text-align:center;"><img src="/Resources/Assets/Enemy.png" alt="Enemy Character" width="32"></td>
   </tr>
   <tr>
-    <td style="text-align:center;">Bullet</td>
-    <td style="text-align:center;"><img src="/Resources/Assets/Bullet.png" alt="Bullet" width="32"></td>
+    <td style="text-align:center;">Projectile</td>
+    <td style="text-align:center;"><img src="/Resources/Assets/Projectile.png" alt="Projectile" width="32"></td>
   </tr>
   <tr>
     <td style="text-align:center;">Pickups: Health</td>
