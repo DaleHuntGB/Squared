@@ -15,11 +15,13 @@ class TextureManager
 public:
     static inline Texture2D playerTexture;
     static inline Texture2D enemyTexture;
+    static inline Texture2D bulletTexture;
 
     static void LoadTextures()
     {
         playerTexture = LoadTexture("Resources/Assets/Player.png");
         enemyTexture = LoadTexture("Resources/Assets/Enemy.png");
+        bulletTexture = LoadTexture("Resources/Assets/Bullet.png");
     }
 };
 
@@ -54,7 +56,7 @@ public:
 
     void Draw()
     {
-        if (isActive) { DrawCircle(projectilePosition.x, projectilePosition.y, projectileSize, GREEN); }
+        if (isActive) { DrawTextureEx(TextureManager::bulletTexture, projectilePosition, 0, 1, WHITE); }
     }
 
     static void Shoot(std::vector<Projectile>& projectileObjects, Vector2 startPosition, Vector2 targetPosition, int speed, int damage, int size)
