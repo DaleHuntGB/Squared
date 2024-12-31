@@ -23,7 +23,7 @@ The game is aimed to be an endless runner where the player can wrap around the g
 - Different Projectiles.
 
 # 🖌️ Assets
-
+- Assets are created by myself, using Aseprite. This is still very much a learning experience.
 <table align="center">
   <tr>
     <th style="text-align:center;">Asset Name</th>
