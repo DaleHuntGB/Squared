@@ -37,4 +37,20 @@ The game is aimed to be an endless runner where the player can wrap around the g
     <td style="text-align:center;">Enemy Character</td>
     <td style="text-align:center;"><img src="/Resources/Assets/Enemy.png" alt="Enemy Character" width="100"></td>
   </tr>
+  <tr>
+    <td style="text-align:center;">Bullet</td>
+    <td style="text-align:center;"><img src="/Resources/Assets/Bullet.png" alt="Bullet" width="100"></td>
+  </tr>
+  <tr>
+    <td style="text-align:center;">Pickups: Health</td>
+    <td style="text-align:center;"><img src="/Resources/Assets/Health.png" alt="Pickup: Health" width="100"></td>
+  </tr>
+  <tr>
+    <td style="text-align:center;">Pickups: Life</td>
+    <td style="text-align:center;"><img src="/Resources/Assets/Life.png" alt="Pickup: Life" width="100"></td>
+  </tr>
+  <tr>
+    <td style="text-align:center;">Pickups: PowerUp</td>
+    <td style="text-align:center;"><img src="/Resources/Assets/PowerUp.png" alt="Pickup: PowerUp" width="100"></td>
+  </tr>
 </table>
