@@ -145,11 +145,6 @@ public:
             Projectile::Shoot(projectileObjects, entityPosition, mousePosition, 10, 20, 5);
         }
 
-        if (IsKeyPressed(KEY_F))
-        {
-            std::cout << "Size: " << entitySize << std::endl;
-        }
-
         if (entityPosition.x > SCREEN_WIDTH) entityPosition.x = 0;
         if (entityPosition.x < 0) entityPosition.x = SCREEN_WIDTH;
         if (entityPosition.y > SCREEN_HEIGHT) entityPosition.y = 0;
