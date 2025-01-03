@@ -91,6 +91,7 @@ public:
     bool IsActive() const { return isActive; }
     Vector2 GetPosition() const { return projectilePosition; }
     int GetDamage() const { return projectileDamage; }
+    int GetSize() const { return projectileSize; }
 };
 
 class Entity
@@ -159,7 +160,13 @@ public:
 class Enemy : public Entity
 {
 public:
-    void Draw() override { DrawTextureEx(TextureManager::enemyTexture, entityPosition, 0, 1, WHITE); }
+    void Draw() override 
+    { 
+        DrawTextureEx(TextureManager::enemyTexture, entityPosition, 0, 1, WHITE); 
+        // Health Bars
+        DrawRectangle(entityPosition.x, entityPosition.y - 10, entitySize, 5, RED);
+        DrawRectangle(entityPosition.x, entityPosition.y - 10, entitySize * (entityHealth / 100.0f), 5, GREEN);
+    }
     void Move(Vector2 playerPosition)
     {
         Vector2 direction = {playerPosition.x - entityPosition.x, playerPosition.y - entityPosition.y};
@@ -243,11 +250,27 @@ public:
     {
         for (int i = 0; i < enemyUnits.size(); i++)
         {
+            // Enemies Hit Player
             if (CheckCollisionRecs( {PC.GetPosition().x, PC.GetPosition().y, (float)PC.GetSize(), (float)PC.GetSize()}, {enemyUnits[i].GetPosition().x, enemyUnits[i].GetPosition().y, (float)enemyUnits[i].GetSize(), (float)enemyUnits[i].GetSize()}))
             {
                 PC.SetHealth(PC.GetHealth() - enemyUnits[i].GetCollisionDamage());
                 enemyUnits.erase(enemyUnits.begin() + i);
                 i--;
+            }
+            // Player Bullets Hit Enemy
+            for (int j = 0; j < projectileObjects.size(); j++)
+            {
+                if (CheckCollisionRecs( {projectileObjects[j].GetPosition().x, projectileObjects[j].GetPosition().y, (float)projectileObjects[j].GetSize(), (float)projectileObjects[j].GetSize()}, {enemyUnits[i].GetPosition().x, enemyUnits[i].GetPosition().y, (float)enemyUnits[i].GetSize(), (float)enemyUnits[i].GetSize()}))
+                {
+                    enemyUnits[i].SetHealth(enemyUnits[i].GetHealth() - projectileObjects[j].GetDamage());
+                    projectileObjects.erase(projectileObjects.begin() + j);
+                    if (enemyUnits[i].GetHealth() <= 0)
+                    {
+                        enemyUnits.erase(enemyUnits.begin() + i);
+                        i--;
+                    }
+                    j--;
+                }
             }
         }
     }
