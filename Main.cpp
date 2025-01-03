@@ -261,7 +261,7 @@ private:
 
     void HandlePlayerInput()
     {
-        if (IsKeyPressed(KEY_ESCAPE))
+        if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_Q))
         {
             gameShouldClose = true;
         }
@@ -318,21 +318,29 @@ private:
                     break;
                 }
             }
-            if (PC.GetHealth() <= 0)
-            {
-                // Probably Run `Initiliaze` again if the player wants to restart.
-                HandlePlayerInput();
-                // If player is dead, check for their input.
-                // PC.Move() will handle player movement during the game.
-                // Combine this with the `HandlePlayerInput` function - eventually.
-            }
         }
     }
 
     void DisplayHealth()
     {
         std::string healthText = "Health: " + std::to_string(PC.GetHealth());
-        DrawTextEx(FM->healthFont, healthText.c_str(), {10, 10}, 24, 0, BLACK);
+        if (PC.GetHealth() > 0)
+        {
+            DrawTextEx(FM->healthFont, healthText.c_str(), {10, 10}, 24, 0, BLACK);
+        }
+        else
+        {
+            GameIsOver();
+        }
+    }
+
+    void GameIsOver()
+    {
+        HandlePlayerInput(); // Handle Player Input to Restart or Quit
+        char* GameOverMessage = "You died! Press R to Restart or Q to Quit."; // Char* for DrawTextEx Only :)
+        float GameOverMessageWidth = MeasureTextEx(FM->displayFont, GameOverMessage, 24, 0).x;
+        DrawTextEx(FM->displayFont, GameOverMessage, {(SCREEN_WIDTH - GameOverMessageWidth) / 2, SCREEN_HEIGHT / 2}, 24, 0, BLACK);
+        // TODO: Remove Enemies & Projectiles
     }
 
     TextureManager* TM;
