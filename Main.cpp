@@ -273,7 +273,7 @@ public:
             }
             if (fmod(gameTimer, waveTimer) < 0.01f)
             {
-                std::cout << "GameTimer: " << gameTimer << " | Wave Timer: " << waveTimer << std::endl;
+                std::cout << "Game Timer: " << gameTimer << " | Wave Timer: " << waveTimer << std::endl;
                 SpawnEnemies(3);
             }
         }
