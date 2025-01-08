@@ -152,7 +152,7 @@ protected:
     int entityHealth = 100;
     int entitySpeed = 5;
     int entityDamage = 10;
-    int entityCollisionDamage = 50;
+    int entityCollisionDamage = 0;
     int entitySize = 32;
     Vector2 entityPosition = {0, 0};
 };
@@ -242,10 +242,31 @@ public:
     {
         ClearBackground(RAYWHITE);
 
-        HandlePlayer();
-        HandleEnemies();
-        HandleProjectiles();
-        HandleCollision();
+        HandlePlayerInput(); 
+
+        if (isGameRunning)
+        {
+            HandlePlayer();
+            HandleEnemies();
+            HandleProjectiles();
+            HandleCollision();
+
+            gameTimer += GetFrameTime();
+            // Need to cast to `int` because gameTimer is a float and `GetFrameTime()` will always return a floating number which
+            // if `gameTimer` was an `int`, it would always equal 0.
+            if ((int)gameTimer % 3 == 0)
+            {
+                // Do Something
+            }
+            else if ((int)gameTimer >= 10)
+            {
+                // Do Something
+            }
+        }
+        else
+        {
+            GameIsOver();
+        }
 
         DisplayHealth();
     }
@@ -350,6 +371,7 @@ private:
     std::vector<Enemy> enemyUnits;
     std::vector<Projectile> projectileObjects;
 
+    float gameTimer = 0;
     bool isGameRunning = true;
     bool gameShouldClose = false;
 
