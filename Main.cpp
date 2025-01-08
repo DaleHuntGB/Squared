@@ -14,20 +14,20 @@ class FontManager
 public:
     Font displayFont;
     Font scoreFont;
-    Font healthFont;
+    Font uiFont;
 
     void LoadFonts()
     {
         displayFont = LoadFont("Resources/Fonts/DisplayFont.ttf");
         scoreFont = LoadFont("Resources/Fonts/ScoreFont.otf");
-        healthFont = LoadFont("Resources/Fonts/ScoreFont.otf");
+        uiFont = LoadFont("Resources/Fonts/ScoreFont.otf");
     }
 
     void UnloadFonts()
     {
         UnloadFont(displayFont);
         UnloadFont(scoreFont);
-        UnloadFont(healthFont);
+        UnloadFont(uiFont);
     }
 };
 
@@ -217,6 +217,17 @@ public:
 class GameManager
 {
 public:
+
+    void SpawnEnemies(int enemiesToSpawn)
+    {
+        for (int i = 0; i < enemiesToSpawn; i++)
+        {
+            Enemy enemy;
+            enemy.SetPosition({(float)GetRandomValue(0, SCREEN_WIDTH), (float)GetRandomValue(0, SCREEN_HEIGHT)});
+            enemy.SetSpeed(3);
+            enemyUnits.push_back(enemy);
+        }
+    }
     void Initialize(TextureManager& TM, FontManager& FM)
     {
         this->TM = &TM;
@@ -229,13 +240,7 @@ public:
         isGameRunning = true;
 
         enemyUnits.clear();
-        for (int i = 0; i < numEnemies; i++)
-        {
-            Enemy enemy;
-            enemy.SetPosition({(float)GetRandomValue(0, SCREEN_WIDTH), (float)GetRandomValue(0, SCREEN_HEIGHT)});
-            enemy.SetSpeed(3);
-            enemyUnits.push_back(enemy);
-        }
+        SpawnEnemies(numEnemies);
     }
 
     void Update()
@@ -254,13 +259,15 @@ public:
             gameTimer += GetFrameTime();
             // Need to cast to `int` because gameTimer is a float and `GetFrameTime()` will always return a floating number which
             // if `gameTimer` was an `int`, it would always equal 0.
+            std::cout << "GameTimer: " << gameTimer << std::endl;
             if ((int)gameTimer % 3 == 0)
             {
                 // Do Something
             }
-            else if ((int)gameTimer >= 10)
+            else if ((int)gameTimer % (int)waveTimer == 0)
             {
-                // Do Something
+                std::cout << "GameTimer: " << gameTimer << "Wave Timer: " << waveTimer << std::endl;
+                SpawnEnemies(3);
             }
         }
         else
@@ -268,7 +275,7 @@ public:
             GameIsOver();
         }
 
-        DisplayHealth();
+        DisplayUI();
     }
 
     bool GameShouldClose() const { return gameShouldClose; }
@@ -342,12 +349,14 @@ private:
         }
     }
 
-    void DisplayHealth()
+    void DisplayUI()
     {
         std::string healthText = "Health: " + std::to_string(PC.GetHealth());
-        if (PC.GetHealth() > 0)
+        std::string gameTimerText = "Game Time: " + std::to_string((int)gameTimer);
+        if (isGameRunning)
         {
-            DrawTextEx(FM->healthFont, healthText.c_str(), {10, 10}, 24, 0, BLACK);
+            DrawTextEx(FM->uiFont, healthText.c_str(), {10, 10}, 24, 0, BLACK);
+            DrawTextEx(FM->uiFont, gameTimerText.c_str(), {10, 40}, 24, 0, BLACK);
         }
         else
         {
@@ -372,6 +381,7 @@ private:
     std::vector<Projectile> projectileObjects;
 
     float gameTimer = 0;
+    float waveTimer = 20;
     bool isGameRunning = true;
     bool gameShouldClose = false;
 
@@ -401,3 +411,9 @@ int main()
     CleanUp(FM, TM);
     return 0;
 }
+
+
+// TODO: Track Wave Duration.
+// - Game Time will need to continue running but snapshot when a new wave spawns & when the wave ends (last enemy dies).
+// TODO: Enemies Killed Counter.
+// TODO: Wave Counter.
