@@ -256,7 +256,7 @@ public:
     {
         ClearBackground(RAYWHITE);
 
-        HandlePlayerInput(); 
+        HandlePlayerInput();
 
         if (isGameRunning)
         {
@@ -266,19 +266,15 @@ public:
             HandleCollision();
 
             gameTimer += GetFrameTime();
-            // Need to cast to `int` because gameTimer is a float and `GetFrameTime()` will always return a floating number which
-            // if `gameTimer` was an `int`, it would always equal 0.
-            if ((int)gameTimer % 3 == 0)
+
+            if (fmod(gameTimer, 3.0f) < 0.01f)
             {
                 // Do Something
             }
-            else if ((int)gameTimer % (int)waveTimer == 0)
+            if (fmod(gameTimer, waveTimer) < 0.01f)
             {
-                if (fmod(gameTimer, waveTimer) < 0.01f)
-                {
-                    std::cout << "GameTimer: " << gameTimer << " | Wave Timer: " << waveTimer << std::endl;
-                    SpawnEnemies(3);
-                }
+                std::cout << "GameTimer: " << gameTimer << " | Wave Timer: " << waveTimer << std::endl;
+                SpawnEnemies(3);
             }
         }
         else
