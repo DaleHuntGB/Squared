@@ -168,14 +168,21 @@ public:
     void Move(std::vector<Projectile>& projectileObjects)
     {
         if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D))
+        {
             entityPosition.x += entitySpeed;
+        }
         else if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A))
+        {
             entityPosition.x -= entitySpeed;
+        }
         else if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W))
+        {
             entityPosition.y -= entitySpeed;
+        }
         else if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S))
+        {
             entityPosition.y += entitySpeed;
-
+        }
         if (IsKeyPressed(KEY_SPACE))
         {
             Vector2 mousePosition = GetMousePosition();
