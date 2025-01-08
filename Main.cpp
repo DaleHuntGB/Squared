@@ -229,10 +229,12 @@ public:
     {
         for (int i = 0; i < enemiesToSpawn; i++)
         {
+            if (enemyUnits.size() >= enemiesToSpawn) { break; }
             Enemy enemy;
             enemy.SetPosition({(float)GetRandomValue(0, SCREEN_WIDTH), (float)GetRandomValue(0, SCREEN_HEIGHT)});
             enemy.SetSpeed(3);
             enemyUnits.push_back(enemy);
+            std::cout << "Spawned: " << i << " Enemies" << std::endl;
         }
     }
     void Initialize(TextureManager& TM, FontManager& FM)
@@ -266,15 +268,17 @@ public:
             gameTimer += GetFrameTime();
             // Need to cast to `int` because gameTimer is a float and `GetFrameTime()` will always return a floating number which
             // if `gameTimer` was an `int`, it would always equal 0.
-            std::cout << "GameTimer: " << gameTimer << std::endl;
             if ((int)gameTimer % 3 == 0)
             {
                 // Do Something
             }
             else if ((int)gameTimer % (int)waveTimer == 0)
             {
-                std::cout << "GameTimer: " << gameTimer << "Wave Timer: " << waveTimer << std::endl;
-                SpawnEnemies(3);
+                if (fmod(gameTimer, waveTimer) < 0.01f)
+                {
+                    std::cout << "GameTimer: " << gameTimer << " | Wave Timer: " << waveTimer << std::endl;
+                    SpawnEnemies(3);
+                }
             }
         }
         else
@@ -388,7 +392,7 @@ private:
     std::vector<Projectile> projectileObjects;
 
     float gameTimer = 0;
-    float waveTimer = 20;
+    float waveTimer = 5;
     bool isGameRunning = true;
     bool gameShouldClose = false;
 
