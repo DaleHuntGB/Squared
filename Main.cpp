@@ -235,7 +235,7 @@ public:
     std::map<int, int> enemyCount = {{1, 5}, {2, 10}, {3, 15}, {4, 20}, {5, 25}};
     void SpawnEnemies()
     {
-        if (enemyCount.find(gameLevel) != enemyCount.end())
+        if (enemyCount.find(gameLevel) != enemyCount.end()) // Check if the level is defined in the map.
         {
             int enemiesToSpawn = enemyCount[gameLevel];
             for (int i = 0; i < enemiesToSpawn; i++)
@@ -250,7 +250,7 @@ public:
         }
         else
         {
-            std::cout << "No enemy count defined for level " << gameLevel << std::endl;
+            std::cout << "No Enemy For Level: " << gameLevel << std::endl;
         }
     }
 
