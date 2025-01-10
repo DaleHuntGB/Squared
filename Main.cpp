@@ -105,6 +105,7 @@ public:
         }
     }
 
+
     static void Shoot(std::vector<Projectile>& projectileObjects, Vector2 startPosition, Vector2 targetPosition, int speed, int damage, int size)
     {
         Vector2 projectileDirection = {targetPosition.x - startPosition.x, targetPosition.y - startPosition.y};
@@ -123,6 +124,8 @@ public:
     Vector2 GetPosition() const { return projectilePosition; }
     int GetDamage() const { return projectileDamage; }
     int GetSize() const { return projectileSize; }
+    int GetSpeed() const { return projectileSpeed; }
+    int SetSpeed(int speed) { return projectileSpeed = speed; }
 };
 
 class Entity
@@ -271,16 +274,19 @@ public:
             HandleProjectiles();
             HandleCollision();
 
-            gameTimer += GetFrameTime();
+            if (!isGamePaused)
+            {
+                gameTimer += GetFrameTime();
 
-            if (fmod(gameTimer, 3.0f) < 0.01f)
-            {
-                // Do Something
-            }
-            if (fmod(gameTimer, waveTimer) < 0.01f)
-            {
-                std::cout << "Game Timer: " << gameTimer << " | Wave Timer: " << waveTimer << std::endl;
-                SpawnEnemies(3);
+                if (fmod(gameTimer, 3.0f) < 0.01f)
+                {
+                    // Do Something
+                }
+                if (fmod(gameTimer, waveTimer) < 0.01f)
+                {
+                    std::cout << "Game Timer: " << gameTimer << " | Wave Timer: " << waveTimer << std::endl;
+                    SpawnEnemies(3);
+                }
             }
         }
         else
@@ -309,6 +315,25 @@ private:
         if (IsKeyPressed(KEY_R))
         {
             Initialize(*TM, *FM);
+        }
+        if (isGameRunning && IsKeyPressed(KEY_P))
+        {
+            std::cout << "Game Paused" << std::endl;
+            isGamePaused = !isGamePaused;
+
+            for (auto& enemy : enemyUnits)
+            {
+                enemy.SetSpeed(isGamePaused ? 0 : 3);
+            }
+
+            for (auto& projectile : projectileObjects)
+            {
+                projectile.SetSpeed(isGamePaused ? 0 : 10);
+            }
+
+            PC.SetSpeed(isGamePaused ? 0 : 5);
+
+            gameTimer = isGamePaused ? gameTimer : gameTimer;
         }
     }
 
@@ -409,6 +434,7 @@ private:
     float gameTimer = 0;
     float waveTimer = 5;
     bool isGameRunning = true;
+    bool isGamePaused = false;
     bool gameShouldClose = false;
 
     int numEnemies = 5;
