@@ -438,6 +438,9 @@ private:
         // TODO: Remove Enemies & Projectiles
     }
 
+    void SetGameLevel(int level) { gameLevel = level; }
+    int GetGameLevel() { return gameLevel; }
+
     TextureManager* TM;
     FontManager* FM;
 
