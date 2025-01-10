@@ -414,7 +414,7 @@ private:
         std::string playerLivesText = "Lives: " + std::to_string(PC.GetPlayerLives());
         std::string gameTimerText = "Game Time: " + std::to_string((int)gameTimer);
         std::string activeEnemiesText = "Active Enemies: " + std::to_string(enemyUnits.size());
-        std::string gameLevelText = "Game Level: " + std::to_string(gameLevel);
+        std::string gameLevelText = "Level: " + std::to_string(gameLevel);
         if (isGameRunning)
         {
             DrawTextEx(FM->uiFont, healthText.c_str(), {10, 10}, 24, 0, BLACK);
