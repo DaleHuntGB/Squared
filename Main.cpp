@@ -3,6 +3,7 @@
 #include <cmath>
 #include <vector>
 #include <algorithm>
+#include <map>
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 640
@@ -231,19 +232,28 @@ public:
 class GameManager
 {
 public:
-
-    void SpawnEnemies(int enemiesToSpawn)
+    std::map<int, int> enemyCount = {{1, 5}, {2, 10}, {3, 15}, {4, 20}, {5, 25}};
+    void SpawnEnemies()
     {
-        for (int i = 0; i < enemiesToSpawn; i++)
+        if (enemyCount.find(gameLevel) != enemyCount.end())
         {
-            if (enemyUnits.size() >= enemiesToSpawn) { break; }
-            Enemy enemy;
-            enemy.SetPosition({(float)GetRandomValue(0, SCREEN_WIDTH), (float)GetRandomValue(0, SCREEN_HEIGHT)});
-            enemy.SetSpeed(3);
-            enemyUnits.push_back(enemy);
-            std::cout << "Spawned: " << i << " Enemies" << std::endl;
+            int enemiesToSpawn = enemyCount[gameLevel];
+            for (int i = 0; i < enemiesToSpawn; i++)
+            {
+                if (enemyUnits.size() >= enemiesToSpawn) { break; }
+                Enemy enemy;
+                enemy.SetPosition({(float)GetRandomValue(0, SCREEN_WIDTH), (float)GetRandomValue(0, SCREEN_HEIGHT)});
+                enemy.SetSpeed(3);
+                enemyUnits.push_back(enemy);
+                std::cout << "Spawned: " << i + 1 << " Enemies" << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << "No enemy count defined for level " << gameLevel << std::endl;
         }
     }
+
     void Initialize(TextureManager& TM, FontManager& FM)
     {
         this->TM = &TM;
@@ -258,7 +268,7 @@ public:
         isGameRunning = true;
 
         enemyUnits.clear();
-        SpawnEnemies(numEnemies);
+        SpawnEnemies();
     }
 
     void Update()
@@ -285,7 +295,7 @@ public:
                 if (fmod(gameTimer, waveTimer) < 0.01f)
                 {
                     std::cout << "Game Timer: " << gameTimer << " | Wave Timer: " << waveTimer << std::endl;
-                    SpawnEnemies(3);
+                    SpawnEnemies();
                 }
             }
         }
@@ -403,11 +413,15 @@ private:
         std::string healthText = "Health: " + std::to_string(PC.GetHealth());
         std::string playerLivesText = "Lives: " + std::to_string(PC.GetPlayerLives());
         std::string gameTimerText = "Game Time: " + std::to_string((int)gameTimer);
+        std::string activeEnemiesText = "Active Enemies: " + std::to_string(enemyUnits.size());
+        std::string gameLevelText = "Game Level: " + std::to_string(gameLevel);
         if (isGameRunning)
         {
             DrawTextEx(FM->uiFont, healthText.c_str(), {10, 10}, 24, 0, BLACK);
             DrawTextEx(FM->uiFont, playerLivesText.c_str(), {10, 40}, 24, 0, BLACK);
             DrawTextEx(FM->uiFont, gameTimerText.c_str(), {10, 70}, 24, 0, BLACK);
+            DrawTextEx(FM->uiFont, activeEnemiesText.c_str(), {10, 100}, 24, 0, BLACK);
+            DrawTextEx(FM->uiFont, gameLevelText.c_str(), {10, 130}, 24, 0, BLACK);
         }
         else
         {
@@ -438,6 +452,7 @@ private:
     bool gameShouldClose = false;
 
     int numEnemies = 5;
+    int gameLevel = 1;
 };
 
 void CleanUp(FontManager& FM, TextureManager& TM)
