@@ -152,7 +152,7 @@ protected:
     int entityHealth = 100;
     int entitySpeed = 5;
     int entityDamage = 10;
-    int entityCollisionDamage = 0;
+    int entityCollisionDamage = 25;
     int entitySize = 32;
     Vector2 entityPosition = {0, 0};
 };
@@ -194,6 +194,10 @@ public:
         if (entityPosition.y > SCREEN_HEIGHT) entityPosition.y = 0;
         if (entityPosition.y < 0) entityPosition.y = SCREEN_HEIGHT;
     }
+    int SetPlayerLives(int lives) { return playerLives = lives; }
+    int GetPlayerLives() { return playerLives; }
+private:
+    int playerLives = 3;
 };
 
 class Enemy : public Entity
@@ -245,6 +249,8 @@ public:
         PC.SetHealth(100);
         PC.SetSpeed(5);
         PC.SetPosition({SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2});
+        PC.SetPlayerLives(3);
+        gameTimer = 0;
 
         isGameRunning = true;
 
@@ -335,6 +341,17 @@ private:
                 PC.SetHealth(PC.GetHealth() - enemyUnits[i].GetCollisionDamage());
                 enemyUnits.erase(enemyUnits.begin() + i);
                 --i;
+                if (PC.GetHealth() <= 0)
+                {
+                    std::cout << "Player Health: " << PC.GetHealth() << std::endl;
+                    PC.SetPlayerLives(PC.GetPlayerLives() - 1);
+                    std::cout << "Player Lives: " << PC.GetPlayerLives() << std::endl;
+                    PC.SetHealth(100);
+                    if (PC.GetPlayerLives() <= 0)
+                    {
+                        isGameRunning = false;
+                    }
+                }
                 continue;
             }
 
@@ -359,11 +376,13 @@ private:
     void DisplayUI()
     {
         std::string healthText = "Health: " + std::to_string(PC.GetHealth());
+        std::string playerLivesText = "Lives: " + std::to_string(PC.GetPlayerLives());
         std::string gameTimerText = "Game Time: " + std::to_string((int)gameTimer);
         if (isGameRunning)
         {
             DrawTextEx(FM->uiFont, healthText.c_str(), {10, 10}, 24, 0, BLACK);
-            DrawTextEx(FM->uiFont, gameTimerText.c_str(), {10, 40}, 24, 0, BLACK);
+            DrawTextEx(FM->uiFont, playerLivesText.c_str(), {10, 40}, 24, 0, BLACK);
+            DrawTextEx(FM->uiFont, gameTimerText.c_str(), {10, 70}, 24, 0, BLACK);
         }
         else
         {
