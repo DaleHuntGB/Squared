@@ -13,6 +13,13 @@ The game is aimed to be an endless runner where the player can wrap around the g
 - Navigate to the folder.
 - `make` will build & run the project.
 
+# ✅ Features
+- Game Timer.
+- Pause / Resume Functionality.
+- Basic Enemy Movement.
+- Player Health / Lives System.
+- Basic Scoring System.
+
 # 🔧 TODO
 - Seperate into Header / CPP Files.
   - `static inline` will be corrected with this. I need to read more about the benefits.
