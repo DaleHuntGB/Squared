@@ -481,9 +481,3 @@ int main()
     CleanUp(FM, TM);
     return 0;
 }
-
-
-// TODO: Track Wave Duration.
-// - Game Time will need to continue running but snapshot when a new wave spawns & when the wave ends (last enemy dies).
-// TODO: Enemies Killed Counter.
-// TODO: Wave Counter.

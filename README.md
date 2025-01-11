@@ -5,7 +5,6 @@ Squared is a WIP Private Project that will be solely developed by myself. The ai
 The game is aimed to be an endless runner where the player can wrap around the game window. The idea is to kill enemies, score points and survive as long as possible.
 
 # 📚 Libraries
-
 - [RayLib](https://github.com/raysan5/raylib)
 - [Make](https://developers.make.com/api-documentation/make-api-documentation)
 
@@ -15,13 +14,21 @@ The game is aimed to be an endless runner where the player can wrap around the g
 - `make` will build & run the project.
 
 # 🔧 TODO
-
 - Seperate into Header / CPP Files.
   - `static inline` will be corrected with this. I need to read more about the benefits.
+  - `static inline` was fixed with Pointers & References instead. This will make seperation easier.
 - Enemies Attack Player.
+  - Enemies will deal collision damage to the player upon impact.
 - Player Health Bar.
 - Enemy Waves & Timer.
+  - Implemented in a basic manner. Enemies will spawn in waves based on game timer. 
+  - Number of Enemies spawned are based on `std::map` of `gameLevel` -> `numEnemies`.
 - Different Projectiles.
+- Wave Duration.
+  - Indicate how long a wave has taken to be killed.
+  - Issue: As enemy count increases, this duration will become more relevant but harder to track as new waves will be spawning.
+- Enemies Killed / Waves Killed Counter.
+  - Interesting metric for the user.
 
 # 🖌️ Assets
 - Assets are created by myself, using Aseprite. This is still very much a learning experience.
