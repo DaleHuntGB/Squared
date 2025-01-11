@@ -8,7 +8,7 @@ The game is aimed to be an endless runner where the player can wrap around the g
 - [RayLib](https://github.com/raysan5/raylib)
 - [Make](https://developers.make.com/api-documentation/make-api-documentation)
 
-# 🔨 Build | Linux Only.
+# 🔨 Build [Linux]
 - Open `Terminal`.
 - Navigate to the folder.
 - `make` will build & run the project.
