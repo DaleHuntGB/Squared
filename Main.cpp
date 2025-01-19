@@ -227,6 +227,30 @@ public:
             entityPosition.y += direction.y * entitySpeed;
         }
     }
+
+    void ShootAtPlayer(std::vector<Projectile>& projectileObjects, Vector2 playerPosition)
+    {
+        Vector2 direction = {playerPosition.x - entityPosition.x, playerPosition.y - entityPosition.y};
+        float distance = sqrt(direction.x * direction.x + direction.y * direction.y);
+
+        if (distance > 0 && canShoot)
+        {
+            Projectile::Shoot(projectileObjects, entityPosition, playerPosition, 5, 10, 5);
+            canShoot = false;
+        }
+        else
+        {
+            shootCooldown -= GetFrameTime();
+            if (shootCooldown <= 0)
+            {
+                canShoot = true;
+                shootCooldown = 1;
+            }
+        }
+    }
+private:
+    float shootCooldown = 0;
+    bool canShoot = false;
 };
 
 class GameManager
@@ -313,7 +337,7 @@ private:
     void HandlePlayer()
     {
         PC.Draw(*TM);
-        PC.Move(projectileObjects);
+        PC.Move(playerProjectileObjects);
     }
 
     void HandlePlayerInput()
@@ -336,7 +360,7 @@ private:
                 enemy.SetSpeed(isGamePaused ? 0 : 3);
             }
 
-            for (auto& projectile : projectileObjects)
+            for (auto& projectile : playerProjectileObjects)
             {
                 projectile.SetSpeed(isGamePaused ? 0 : 10);
             }
@@ -353,18 +377,27 @@ private:
         {
             enemy.Draw(*TM);
             enemy.Move(PC.GetPosition());
+            enemy.ShootAtPlayer(enemyProjectileObjects, PC.GetPosition());
         }
     }
 
     void HandleProjectiles()
     {
-        for (auto& projectile : projectileObjects)
+        for (auto& projectile : playerProjectileObjects)
         {
             projectile.Update();
             projectile.Draw(*TM);
         }
-            projectileObjects.erase( std::remove_if(projectileObjects.begin(), projectileObjects.end(), [](const Projectile& p) { return !p.IsActive(); }),
-            projectileObjects.end());
+        playerProjectileObjects.erase( std::remove_if(playerProjectileObjects.begin(), playerProjectileObjects.end(), [](const Projectile& p) { return !p.IsActive(); }),
+        playerProjectileObjects.end());
+
+        for (auto& projectile : enemyProjectileObjects)
+        {
+            projectile.Update();
+            projectile.Draw(*TM);
+        }
+        enemyProjectileObjects.erase( std::remove_if(enemyProjectileObjects.begin(), enemyProjectileObjects.end(), [](const Projectile& p) { return !p.IsActive(); }),
+        enemyProjectileObjects.end());
     }
 
     void HandleCollision()
@@ -389,18 +422,39 @@ private:
                 }
                 continue;
             }
-
-            for (size_t j = 0; j < projectileObjects.size(); ++j)
+            // Player Projectile Collision
+            for (size_t j = 0; j < playerProjectileObjects.size(); ++j)
             {
-                if (CheckCollisionRecs( {projectileObjects[j].GetPosition().x, projectileObjects[j].GetPosition().y, (float)projectileObjects[j].GetSize(), (float)projectileObjects[j].GetSize()}, {enemyUnits[i].GetPosition().x, enemyUnits[i].GetPosition().y, (float)enemyUnits[i].GetSize(), (float)enemyUnits[i].GetSize()}))
+                if (CheckCollisionRecs( {playerProjectileObjects[j].GetPosition().x, playerProjectileObjects[j].GetPosition().y, (float)playerProjectileObjects[j].GetSize(), (float)playerProjectileObjects[j].GetSize()}, {enemyUnits[i].GetPosition().x, enemyUnits[i].GetPosition().y, (float)enemyUnits[i].GetSize(), (float)enemyUnits[i].GetSize()}))
                 {
-                    enemyUnits[i].SetHealth(enemyUnits[i].GetHealth() - projectileObjects[j].GetDamage());
-                    projectileObjects.erase(projectileObjects.begin() + j);
+                    enemyUnits[i].SetHealth(enemyUnits[i].GetHealth() - playerProjectileObjects[j].GetDamage());
+                    playerProjectileObjects.erase(playerProjectileObjects.begin() + j);
 
                     if (enemyUnits[i].GetHealth() <= 0)
                     {
                         enemyUnits.erase(enemyUnits.begin() + i);
                         --i;
+                    }
+                    break;
+                }
+            }
+            // Enemy Projectile Collision
+            for (size_t j = 0; j < enemyProjectileObjects.size(); ++j)
+            {
+                if (CheckCollisionRecs( {enemyProjectileObjects[j].GetPosition().x, enemyProjectileObjects[j].GetPosition().y, (float)enemyProjectileObjects[j].GetSize(), (float)enemyProjectileObjects[j].GetSize()}, {PC.GetPosition().x, PC.GetPosition().y, (float)PC.GetSize(), (float)PC.GetSize()}))
+                {
+                    PC.SetHealth(PC.GetHealth() - enemyProjectileObjects[j].GetDamage());
+                    enemyProjectileObjects.erase(enemyProjectileObjects.begin() + j);
+                    if (PC.GetHealth() <= 0)
+                    {
+                        std::cout << "Player Health: " << PC.GetHealth() << std::endl;
+                        PC.SetPlayerLives(PC.GetPlayerLives() - 1);
+                        std::cout << "Player Lives: " << PC.GetPlayerLives() << std::endl;
+                        PC.SetHealth(100);
+                        if (PC.GetPlayerLives() <= 0)
+                        {
+                            isGameRunning = false;
+                        }
                     }
                     break;
                 }
@@ -446,7 +500,8 @@ private:
 
     Player PC;
     std::vector<Enemy> enemyUnits;
-    std::vector<Projectile> projectileObjects;
+    std::vector<Projectile> playerProjectileObjects;
+    std::vector<Projectile> enemyProjectileObjects;
 
     float gameTimer = 0;
     float waveTimer = 5;
