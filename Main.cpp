@@ -365,6 +365,11 @@ private:
                 projectile.SetSpeed(isGamePaused ? 0 : 10);
             }
 
+            for (auto& projectile : enemyProjectileObjects)
+            {
+                projectile.SetSpeed(isGamePaused ? 0 : 5);
+            }
+
             PC.SetSpeed(isGamePaused ? 0 : 5);
 
             gameTimer = isGamePaused ? gameTimer : gameTimer;
