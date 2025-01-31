@@ -256,7 +256,7 @@ private:
 class GameManager
 {
 public:
-    std::map<int, int> enemyCount = {{1, 5}, {2, 10}, {3, 15}, {4, 20}, {5, 25}};
+    std::map<int, int> enemyCount = {{1, 4}, {2, 7}, {3, 10}, {4, 12}, {5, 15}};
     void SpawnEnemies()
     {
         if (enemyCount.find(gameLevel) != enemyCount.end()) // Check if the level is defined in the map.
@@ -484,6 +484,7 @@ private:
         std::string gameTimerText = "Game Time: " + std::to_string((int)gameTimer);
         std::string activeEnemiesText = "Active Enemies: " + std::to_string(enemyUnits.size());
         std::string gameLevelText = "Level: " + std::to_string(gameLevel);
+        std::string enemiesKilledText = "Enemies Killed: " + std::to_string(enemiesKilled);
         if (isGameRunning)
         {
             DrawTextEx(FM->uiFont, healthText.c_str(), {10, 10}, 24, 0, BLACK);
@@ -491,6 +492,7 @@ private:
             DrawTextEx(FM->uiFont, gameTimerText.c_str(), {10, 70}, 24, 0, BLACK);
             DrawTextEx(FM->uiFont, activeEnemiesText.c_str(), {10, 100}, 24, 0, BLACK);
             DrawTextEx(FM->uiFont, gameLevelText.c_str(), {10, 130}, 24, 0, BLACK);
+            DrawTextEx(FM->uiFont, enemiesKilledText.c_str(), {10, 160}, 24, 0, BLACK);
         }
         else
         {
