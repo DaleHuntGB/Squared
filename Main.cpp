@@ -256,29 +256,31 @@ private:
 class GameManager
 {
 public:
-    std::map<int, int> enemyCount = {{1, 4}, {2, 7}, {3, 10}, {4, 12}, {5, 15}};
+    // Level Stats: {Level, Enemies To Spawn, Enemy Speed}
+    std::vector<std::tuple<int, int, int>> levelStats = {
+        {1, 4, 2},
+        {2, 7, 3},
+        {3, 10, 4},
+        {4, 12, 5},
+        {5, 15, 6}
+    };
+
     void SpawnEnemies()
     {
-        if (enemyCount.find(gameLevel) != enemyCount.end()) // Check if the level is defined in the map.
+        int enemySpeed = std::get<2>(levelStats[gameLevel - 1]);
+        if (gameLevel < 1 || gameLevel > levelStats.size()) { std::cout << "No Enemy For Level: " << gameLevel << std::endl; return; }
+        int enemiesToSpawn = std::get<1>(levelStats[gameLevel - 1]);
+        std::cout << "Game Level: " << gameLevel << " | Enemies Killed: " << enemiesKilled << std::endl;
+        for (int i = 0; i < enemiesToSpawn; i++)
         {
-            int enemiesToSpawn = enemyCount[gameLevel];
-            std::cout << "Game Level: " << gameLevel << " | Enemies Killed: " << enemiesKilled << std::endl;
-            for (int i = 0; i < enemiesToSpawn; i++)
-            {
-                if (enemyUnits.size() >= enemiesToSpawn) { break; }
-                Enemy enemy;
-                enemy.SetPosition((Vector2){ GetRandomValue(-200, SCREEN_WIDTH + 200), GetRandomValue(-200, SCREEN_HEIGHT + 200)});
-                enemy.SetSpeed(3);
-                enemyUnits.push_back(enemy);
-                std::cout << "Spawned: " << i + 1 << " Enemies" << std::endl;
-            }
-            enemiesToSpawn = 0;
+            if (enemyUnits.size() >= enemiesToSpawn) break;
+            Enemy enemy;
+            enemy.SetPosition((Vector2){ GetRandomValue(-200, SCREEN_WIDTH + 200), GetRandomValue(-200, SCREEN_HEIGHT + 200) });
+            enemy.SetSpeed(enemySpeed);
+            enemyUnits.push_back(enemy);
+            std::cout << "Spawned: " << i + 1 << " Enemies" << std::endl;
         }
-        else
-        {
-            std::cout << "No Enemy For Level: " << gameLevel << std::endl;
-        }
-    }
+}
 
     void Initialize(TextureManager& TM, FontManager& FM)
     {
@@ -441,7 +443,7 @@ private:
                     {
                         enemyUnits.erase(enemyUnits.begin() + i);
                         enemiesKilled++;
-                        if (enemiesKilled == enemyCount[gameLevel])
+                        if (enemiesKilled == std::get<2>(levelStats[gameLevel - 1]))
                         {
                             gameLevel++;
                             enemiesKilled = 0;
