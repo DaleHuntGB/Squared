@@ -262,15 +262,17 @@ public:
         if (enemyCount.find(gameLevel) != enemyCount.end()) // Check if the level is defined in the map.
         {
             int enemiesToSpawn = enemyCount[gameLevel];
+            std::cout << "Game Level: " << gameLevel << " | Enemies Killed: " << enemiesKilled << std::endl;
             for (int i = 0; i < enemiesToSpawn; i++)
             {
                 if (enemyUnits.size() >= enemiesToSpawn) { break; }
                 Enemy enemy;
-                enemy.SetPosition({(float)GetRandomValue(0, SCREEN_WIDTH), (float)GetRandomValue(0, SCREEN_HEIGHT)});
+                enemy.SetPosition((Vector2){ GetRandomValue(-200, SCREEN_WIDTH + 200), GetRandomValue(-200, SCREEN_HEIGHT + 200)});
                 enemy.SetSpeed(3);
                 enemyUnits.push_back(enemy);
                 std::cout << "Spawned: " << i + 1 << " Enemies" << std::endl;
             }
+            enemiesToSpawn = 0;
         }
         else
         {
@@ -438,6 +440,14 @@ private:
                     if (enemyUnits[i].GetHealth() <= 0)
                     {
                         enemyUnits.erase(enemyUnits.begin() + i);
+                        enemiesKilled++;
+                        if (enemiesKilled == enemyCount[gameLevel])
+                        {
+                            gameLevel++;
+                            enemiesKilled = 0;
+                            PC.SetHealth(100);
+                            PC.SetPlayerLives(3);
+                        }
                         --i;
                     }
                     break;
@@ -516,6 +526,7 @@ private:
 
     int numEnemies = 5;
     int gameLevel = 1;
+    int enemiesKilled = 0;
 };
 
 void CleanUp(FontManager& FM, TextureManager& TM)
