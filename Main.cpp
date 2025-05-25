@@ -5,8 +5,8 @@
 #include <algorithm>
 #include <map>
 
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 640
+#define SCREEN_WIDTH 720
+#define SCREEN_HEIGHT 720
 #define WINDOW_TITLE "Squared"
 #define TARGET_FPS 60
 
@@ -57,7 +57,7 @@ public:
 
     void LoadTextures()
     {
-        backgroundTexture = LoadTexture("Resources/Assets/Background.jpg");
+        backgroundTexture = LoadTexture("Resources/Assets/Background.png");
         playerTexture = LoadTexture("Resources/Assets/Player.png");
         enemyTexture = LoadTexture("Resources/Assets/Enemy.png");
         projectileTexture = LoadTexture("Resources/Assets/Projectile.png");
