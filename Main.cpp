@@ -35,6 +35,7 @@ public:
 class TextureManager
 {
 public:
+    Texture2D backgroundTexture;
     Texture2D playerTexture;
     Texture2D enemyTexture;
     Texture2D projectileTexture;
@@ -44,6 +45,7 @@ public:
 
     void LoadTextures()
     {
+        backgroundTexture = LoadTexture("Resources/Assets/Background.jpg");
         playerTexture = LoadTexture("Resources/Assets/Player.png");
         enemyTexture = LoadTexture("Resources/Assets/Enemy.png");
         projectileTexture = LoadTexture("Resources/Assets/Projectile.png");
@@ -364,6 +366,8 @@ class GameManager
     {
         ClearBackground(RAYWHITE);
 
+        DrawTexture(TM->backgroundTexture, 0, 0, WHITE);
+
         HandlePlayerInput();
 
         if (isGameRunning)
@@ -549,6 +553,8 @@ private:
     {
         std::string healthText = "Health: " + std::to_string(PC.GetHealth());
         std::string playerLivesText = "Lives: " + std::to_string(PC.GetPlayerLives());
+        std::string damageText = "Damage: " + std::to_string(PC.GetDamage());
+        std::string speedText = "Speed: " + std::to_string(PC.GetSpeed());
         std::string gameTimerText = "Game Time: " + std::to_string((int)gameTimer);
         std::string activeEnemiesText = "Active Enemies: " + std::to_string(enemyUnits.size());
         std::string gameLevelText = "Level: " + std::to_string(gameLevel);
@@ -556,6 +562,8 @@ private:
         if (isGameRunning)
         {
             DrawTextEx(FM->uiFont, healthText.c_str(), {10, 10}, 24, 0, BLACK);
+            DrawTextEx(FM->uiFont, damageText.c_str(), {SCREEN_WIDTH - 150, 10}, 24, 0, BLACK);
+            DrawTextEx(FM->uiFont, speedText.c_str(), {SCREEN_WIDTH - 150, 40}, 24, 0, BLACK);
             DrawTextEx(FM->uiFont, playerLivesText.c_str(), {10, 40}, 24, 0, BLACK);
             DrawTextEx(FM->uiFont, gameTimerText.c_str(), {10, 70}, 24, 0, BLACK);
             DrawTextEx(FM->uiFont, activeEnemiesText.c_str(), {10, 100}, 24, 0, BLACK);
