@@ -76,7 +76,6 @@ public:
     }
 };
 
-
 void SetupGameWindow(TextureManager& TM, FontManager& FM)
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE);
