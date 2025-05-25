@@ -58,19 +58,12 @@ public:
     void LoadTextures()
     {
         backgroundTexture = LoadTexture("Resources/Assets/Background.jpg");
-        std::cout << "Loaded Background Texture: " << backgroundTexture.id << std::endl;
         playerTexture = LoadTexture("Resources/Assets/Player.png");
-        std::cout << "Loaded Player Texture: " << playerTexture.id << std::endl;
         enemyTexture = LoadTexture("Resources/Assets/Enemy.png");
-        std::cout << "Loaded Enemy Texture: " << enemyTexture.id << std::endl;
         projectileTexture = LoadTexture("Resources/Assets/Projectile.png");
-        std::cout << "Loaded Projectile Texture: " << projectileTexture.id << std::endl;
         powerUpTextures[HEALTH] = LoadTexture("Resources/Assets/Health.png");
-        std::cout << "Loaded Health Power-Up Texture: " << powerUpTextures[HEALTH].id << std::endl;
         powerUpTextures[LIFE] = LoadTexture("Resources/Assets/Life.png");
-        std::cout << "Loaded Life Power-Up Texture: " << powerUpTextures[LIFE].id << std::endl;
         powerUpTextures[DAMAGE] = LoadTexture("Resources/Assets/PowerUp.png");
-        std::cout << "Loaded Damage Power-Up Texture: " << powerUpTextures[DAMAGE].id << std::endl;
     }
 
     void UnloadTextures()
