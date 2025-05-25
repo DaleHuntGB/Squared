@@ -32,43 +32,10 @@ public:
     }
 };
 
-class TextureManager
-{
-public:
-    Texture2D backgroundTexture;
-    Texture2D playerTexture;
-    Texture2D enemyTexture;
-    Texture2D projectileTexture;
-    Texture2D healthTexture;
-    Texture2D powerUpTexture;
-    Texture2D lifeTexture;
-
-    void LoadTextures()
-    {
-        backgroundTexture = LoadTexture("Resources/Assets/Background.jpg");
-        playerTexture = LoadTexture("Resources/Assets/Player.png");
-        enemyTexture = LoadTexture("Resources/Assets/Enemy.png");
-        projectileTexture = LoadTexture("Resources/Assets/Projectile.png");
-        healthTexture = LoadTexture("Resources/Assets/Health.png");
-        powerUpTexture = LoadTexture("Resources/Assets/PowerUp.png");
-        lifeTexture = LoadTexture("Resources/Assets/Life.png");
-    }
-
-    void UnloadTextures()
-    {
-        UnloadTexture(playerTexture);
-        UnloadTexture(enemyTexture);
-        UnloadTexture(projectileTexture);
-        UnloadTexture(healthTexture);
-        UnloadTexture(powerUpTexture);
-        UnloadTexture(lifeTexture);
-    }
-};
-
 enum PowerUpType {
-    HEALTH = 1,
-    SPEED = 2,
-    DAMAGE = 3
+    HEALTH = 0,
+    LIFE = 1,
+    DAMAGE = 2
 };
 
 struct PowerUps 
@@ -78,6 +45,44 @@ struct PowerUps
     PowerUpType type;
     bool isActive = true;
 };
+
+class TextureManager
+{
+public:
+    Texture2D backgroundTexture;
+    Texture2D playerTexture;
+    Texture2D enemyTexture;
+    Texture2D projectileTexture;
+    Texture2D powerUpTextures[3];
+
+    void LoadTextures()
+    {
+        backgroundTexture = LoadTexture("Resources/Assets/Background.jpg");
+        std::cout << "Loaded Background Texture: " << backgroundTexture.id << std::endl;
+        playerTexture = LoadTexture("Resources/Assets/Player.png");
+        std::cout << "Loaded Player Texture: " << playerTexture.id << std::endl;
+        enemyTexture = LoadTexture("Resources/Assets/Enemy.png");
+        std::cout << "Loaded Enemy Texture: " << enemyTexture.id << std::endl;
+        projectileTexture = LoadTexture("Resources/Assets/Projectile.png");
+        std::cout << "Loaded Projectile Texture: " << projectileTexture.id << std::endl;
+        powerUpTextures[HEALTH] = LoadTexture("Resources/Assets/Health.png");
+        std::cout << "Loaded Health Power-Up Texture: " << powerUpTextures[HEALTH].id << std::endl;
+        powerUpTextures[LIFE] = LoadTexture("Resources/Assets/Life.png");
+        std::cout << "Loaded Life Power-Up Texture: " << powerUpTextures[LIFE].id << std::endl;
+        powerUpTextures[DAMAGE] = LoadTexture("Resources/Assets/PowerUp.png");
+        std::cout << "Loaded Damage Power-Up Texture: " << powerUpTextures[DAMAGE].id << std::endl;
+    }
+
+    void UnloadTextures()
+    {
+        UnloadTexture(playerTexture);
+        UnloadTexture(enemyTexture);
+        UnloadTexture(projectileTexture);
+        UnloadTexture(backgroundTexture);
+        UnloadTexture(powerUpTextures[4]);
+    }
+};
+
 
 void SetupGameWindow(TextureManager& TM, FontManager& FM)
 {
@@ -299,8 +304,8 @@ std::vector<PowerUps> powerUps;
                     case HEALTH:
                         player.SetHealth(player.GetHealth() + 0.5);
                         break;
-                    case SPEED:
-                        player.SetSpeed(player.GetSpeed() + 0.25);
+                    case LIFE:
+                        player.SetPlayerLives(player.GetPlayerLives() + 1);
                         break;
                     case DAMAGE:
                         player.SetDamage(player.GetDamage() + 1.25);
@@ -508,7 +513,7 @@ private:
                     if (enemyUnits[i].GetHealth() <= 0)
                     {
                         PowerUpType powerUpType = static_cast<PowerUpType>(GetRandomValue(HEALTH, DAMAGE));
-                        PM->SpawnPowerUp(enemyUnits[i].GetPosition(), TM->powerUpTexture, powerUpType);
+                        PM->SpawnPowerUp(enemyUnits[i].GetPosition(), TM->powerUpTextures[powerUpType], powerUpType);
                         enemyUnits.erase(enemyUnits.begin() + i);
                         enemiesKilled++;
                         if (enemiesKilled == std::get<2>(levelStats[gameLevel - 1]))
