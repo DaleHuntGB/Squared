@@ -72,7 +72,7 @@ public:
         UnloadTexture(enemyTexture);
         UnloadTexture(projectileTexture);
         UnloadTexture(backgroundTexture);
-        UnloadTexture(powerUpTextures[4]);
+        UnloadTexture(powerUpTextures[3]);
     }
 };
 
