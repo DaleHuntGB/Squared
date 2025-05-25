@@ -63,6 +63,20 @@ public:
     }
 };
 
+enum PowerUpType {
+    HEALTH = 1,
+    SPEED = 2,
+    DAMAGE = 3
+};
+
+struct PowerUps 
+{
+    Vector2 position;
+    Texture2D texture;
+    PowerUpType type;
+    bool isActive = true;
+};
+
 void SetupGameWindow(TextureManager& TM, FontManager& FM)
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE);
@@ -73,18 +87,18 @@ void SetupGameWindow(TextureManager& TM, FontManager& FM)
 
 class Projectile
 {
-protected:
+    protected:
     Vector2 projectilePosition;
     Vector2 projectileDirection;
     int projectileSpeed;
     int projectileDamage;
     int projectileSize;
     bool isActive;
-
-public:
+    
+    public:
     Projectile(Vector2 position, Vector2 direction, int speed, int damage, int size)
-        : projectilePosition(position), projectileDirection(direction), projectileSpeed(speed), projectileDamage(damage), projectileSize(size), isActive(true) {}
-
+    : projectilePosition(position), projectileDirection(direction), projectileSpeed(speed), projectileDamage(damage), projectileSize(size), isActive(true) {}
+    
     void Update()
     {
         if (isActive)
@@ -97,7 +111,7 @@ public:
             }
         }
     }
-
+    
     void Draw(TextureManager& TM)
     {
         if (isActive)
@@ -105,22 +119,22 @@ public:
             DrawTextureEx(TM.projectileTexture, projectilePosition, 0, 1, WHITE);
         }
     }
-
-
+    
+    
     static void Shoot(std::vector<Projectile>& projectileObjects, Vector2 startPosition, Vector2 targetPosition, int speed, int damage, int size)
     {
         Vector2 projectileDirection = {targetPosition.x - startPosition.x, targetPosition.y - startPosition.y};
         float projectileMagnitude = sqrt(projectileDirection.x * projectileDirection.x + projectileDirection.y * projectileDirection.y);
-
+        
         if (projectileMagnitude > 0)
         {
             projectileDirection.x /= projectileMagnitude;
             projectileDirection.y /= projectileMagnitude;
         }
-
+        
         projectileObjects.emplace_back(startPosition, projectileDirection, speed, damage, size);
     }
-
+    
     bool IsActive() const { return isActive; }
     Vector2 GetPosition() const { return projectilePosition; }
     int GetDamage() const { return projectileDamage; }
@@ -131,28 +145,28 @@ public:
 
 class Entity
 {
-public:
+    public:
     virtual void Draw(TextureManager& TM) = 0;
-
+    
     int GetHealth() { return entityHealth; }
     void SetHealth(int health) { entityHealth = health; }
-
+    
     int GetSpeed() { return entitySpeed; }
     void SetSpeed(int speed) { entitySpeed = speed; }
-
+    
     int GetDamage() { return entityDamage; }
     void SetDamage(int damage) { entityDamage = damage; }
-
+    
     int GetCollisionDamage() { return entityCollisionDamage; }
     void SetCollisionDamage(int damage) { entityCollisionDamage = damage; }
-
+    
     int GetSize() { return entitySize; }
     void SetSize(int size) { entitySize = size; }
-
+    
     Vector2 GetPosition() { return entityPosition; }
     void SetPosition(Vector2 position) { entityPosition = position; }
-
-protected:
+    
+    protected:
     int entityHealth = 100;
     int entitySpeed = 5;
     int entityDamage = 10;
@@ -163,7 +177,7 @@ protected:
 
 class Player : public Entity
 {
-public:
+    public:
     void Draw(TextureManager& TM) override
     {
         DrawTextureEx(TM.playerTexture, entityPosition, 0, 1, WHITE);
@@ -192,7 +206,7 @@ public:
             Vector2 mousePosition = GetMousePosition();
             Projectile::Shoot(projectileObjects, entityPosition, mousePosition, 10, 20, 5);
         }
-
+        
         if (entityPosition.x > SCREEN_WIDTH) entityPosition.x = 0;
         if (entityPosition.x < 0) entityPosition.x = SCREEN_WIDTH;
         if (entityPosition.y > SCREEN_HEIGHT) entityPosition.y = 0;
@@ -200,39 +214,39 @@ public:
     }
     int SetPlayerLives(int lives) { return playerLives = lives; }
     int GetPlayerLives() { return playerLives; }
-private:
+    private:
     int playerLives = 3;
 };
 
 class Enemy : public Entity
 {
 public:
-    void Draw(TextureManager& TM) override
-    {
-        DrawTextureEx(TM.enemyTexture, entityPosition, 0, 1, WHITE);
-        DrawRectangle(entityPosition.x, entityPosition.y - 10, entitySize, 5, RED);
-        DrawRectangle(entityPosition.x, entityPosition.y - 10, entitySize * (entityHealth / 100.0f), 5, GREEN);
-    }
+void Draw(TextureManager& TM) override
+{
+    DrawTextureEx(TM.enemyTexture, entityPosition, 0, 1, WHITE);
+    DrawRectangle(entityPosition.x, entityPosition.y - 10, entitySize, 5, RED);
+    DrawRectangle(entityPosition.x, entityPosition.y - 10, entitySize * (entityHealth / 100.0f), 5, GREEN);
+}
 
-    void Move(Vector2 playerPosition)
+void Move(Vector2 playerPosition)
+{
+    Vector2 direction = {playerPosition.x - entityPosition.x, playerPosition.y - entityPosition.y};
+    float distance = sqrt(direction.x * direction.x + direction.y * direction.y);
+    
+    if (distance > 0)
     {
-        Vector2 direction = {playerPosition.x - entityPosition.x, playerPosition.y - entityPosition.y};
-        float distance = sqrt(direction.x * direction.x + direction.y * direction.y);
-
-        if (distance > 0)
-        {
             direction.x /= distance;
             direction.y /= distance;
             entityPosition.x += direction.x * entitySpeed;
             entityPosition.y += direction.y * entitySpeed;
         }
     }
-
+    
     void ShootAtPlayer(std::vector<Projectile>& projectileObjects, Vector2 playerPosition)
     {
         Vector2 direction = {playerPosition.x - entityPosition.x, playerPosition.y - entityPosition.y};
         float distance = sqrt(direction.x * direction.x + direction.y * direction.y);
-
+        
         if (distance > 0 && canShoot)
         {
             Projectile::Shoot(projectileObjects, entityPosition, playerPosition, 5, 10, 5);
@@ -249,13 +263,56 @@ public:
         }
     }
 private:
-    float shootCooldown = 0;
-    bool canShoot = false;
+float shootCooldown = 0;
+bool canShoot = false;
+};
+
+class PickupManager {
+public:
+std::vector<PowerUps> powerUps;
+
+    void SpawnPowerUp(Vector2 powerUpPosition, Texture2D powerUpTexture, PowerUpType powerUpType) {
+        powerUps.push_back({powerUpPosition, powerUpTexture, powerUpType, true});
+    }
+
+    void DrawPowerUps() {
+        for (const auto& powerUp : powerUps) {
+            if (powerUp.isActive) {
+                DrawTexture(powerUp.texture, powerUp.position.x, powerUp.position.y, WHITE);
+            }
+        }
+    }
+
+    void ClearPowerUps() {
+        powerUps.clear();
+    }
+
+    void HandlePowerUpCollision(Player& player) {
+        for (size_t i = 0; i < powerUps.size(); ++i) {
+            if (powerUps[i].isActive && CheckCollisionRecs(
+                {player.GetPosition().x, player.GetPosition().y, (float)player.GetSize(), (float)player.GetSize()},
+                {powerUps[i].position.x, powerUps[i].position.y, 32, 32}))
+            {
+                switch (powerUps[i].type) {
+                    case HEALTH:
+                        player.SetHealth(player.GetHealth() + 0.5);
+                        break;
+                    case SPEED:
+                        player.SetSpeed(player.GetSpeed() + 0.25);
+                        break;
+                    case DAMAGE:
+                        player.SetDamage(player.GetDamage() + 1.25);
+                        break;
+                }
+                powerUps[i].isActive = false;
+            }
+        }
+    }
 };
 
 class GameManager
 {
-public:
+    public:
     // Level Stats: {Level, Enemies To Spawn, Enemy Speed}
     std::vector<std::tuple<int, int, int>> levelStats = {
         {1, 4, 2},
@@ -264,7 +321,7 @@ public:
         {4, 12, 5},
         {5, 15, 6}
     };
-
+    
     void SpawnEnemies()
     {
         int enemySpeed = std::get<2>(levelStats[gameLevel - 1]);
@@ -282,10 +339,11 @@ public:
         }
 }
 
-    void Initialize(TextureManager& TM, FontManager& FM)
+    void Initialize(TextureManager& TM, FontManager& FM, PickupManager& PM)
     {
         this->TM = &TM;
         this->FM = &FM;
+        this->PM = &PM;
 
         PC.SetHealth(100);
         PC.SetSpeed(5);
@@ -296,6 +354,9 @@ public:
         isGameRunning = true;
 
         enemyUnits.clear();
+        playerProjectileObjects.clear();
+        enemyProjectileObjects.clear();
+        PM.ClearPowerUps();
         SpawnEnemies();
     }
 
@@ -311,6 +372,7 @@ public:
             HandleEnemies();
             HandleProjectiles();
             HandleCollision();
+            PM->DrawPowerUps();
 
             if (!isGamePaused)
             {
@@ -352,7 +414,7 @@ private:
         }
         if (IsKeyPressed(KEY_R))
         {
-            Initialize(*TM, *FM);
+            Initialize(*TM, *FM, *PM);
         }
         if (isGameRunning && IsKeyPressed(KEY_P))
         {
@@ -441,6 +503,8 @@ private:
 
                     if (enemyUnits[i].GetHealth() <= 0)
                     {
+                        PowerUpType powerUpType = static_cast<PowerUpType>(GetRandomValue(HEALTH, DAMAGE));
+                        PM->SpawnPowerUp(enemyUnits[i].GetPosition(), TM->powerUpTexture, powerUpType);
                         enemyUnits.erase(enemyUnits.begin() + i);
                         enemiesKilled++;
                         if (enemiesKilled == std::get<2>(levelStats[gameLevel - 1]))
@@ -477,6 +541,8 @@ private:
                 }
             }
         }
+        // Handle Power-Up Collection
+        PM->HandlePowerUpCollision(PC);
     }
 
     void DisplayUI()
@@ -516,6 +582,7 @@ private:
 
     TextureManager* TM;
     FontManager* FM;
+    PickupManager* PM;
 
     Player PC;
     std::vector<Enemy> enemyUnits;
@@ -545,8 +612,9 @@ int main()
     GameManager GM;
     FontManager FM;
     TextureManager TM;
+    PickupManager PM;
     SetupGameWindow(TM, FM);
-    GM.Initialize(TM, FM);
+    GM.Initialize(TM, FM, PM);
     while (!WindowShouldClose() && !GM.GameShouldClose())
     {
         BeginDrawing();
