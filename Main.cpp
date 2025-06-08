@@ -314,11 +314,11 @@ class GameManager
     public:
     // Level Stats: {Level, Enemies To Spawn, Enemy Speed}
     std::vector<std::tuple<int, int, int>> levelStats = {
-        {1, 4, 2},
-        {2, 7, 3},
-        {3, 10, 4},
-        {4, 12, 5},
-        {5, 15, 6}
+        {1, 3, 1},
+        {2, 5, 2},
+        {3, 7, 3},
+        {4, 9, 4},
+        {5, 12, 5}
     };
     
     void SpawnEnemies()
