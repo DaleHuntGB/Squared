@@ -409,7 +409,7 @@ private:
 
     void HandlePlayerInput()
     {
-        if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_Q))
+        if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_Q) && isGamePaused)
         {
             gameShouldClose = true;
         }
