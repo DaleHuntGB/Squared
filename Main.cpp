@@ -119,6 +119,10 @@ class Projectile
         }
     }
     
+    void Destroy()
+    {
+        isActive = false;
+    }
     
     static void Shoot(std::vector<Projectile>& projectileObjects, Vector2 startPosition, Vector2 targetPosition, int speed, int damage, int size)
     {
@@ -164,6 +168,8 @@ class Entity
     
     Vector2 GetPosition() { return entityPosition; }
     void SetPosition(Vector2 position) { entityPosition = position; }
+
+    void Destroy() { entityHealth = 0; }
     
     protected:
     int entityHealth = 100;
