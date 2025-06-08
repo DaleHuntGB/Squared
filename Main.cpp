@@ -32,7 +32,8 @@ public:
     }
 };
 
-enum PowerUpType {
+enum PowerUpType
+{
     HEALTH = 0,
     LIFE = 1,
     DAMAGE = 2
@@ -272,7 +273,8 @@ float shootCooldown = 0;
 bool canShoot = false;
 };
 
-class PowerUpManager {
+class PowerUpManager 
+{
 public:
 std::vector<PowerUps> powerUps;
 
