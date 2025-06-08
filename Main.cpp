@@ -398,9 +398,11 @@ class GameManager
                 if (fmod(gameTimer, 3.0f) < 0.01f)
                 {
                     // Do Something
+                    std::cout << "Game Timer: " << gameTimer << std::endl;
                 }
                 if (fmod(gameTimer, waveTimer) < 0.01f)
                 {
+                    std::cout << "Wave Timer: " << waveTimer << std::endl;
                     std::cout << "Game Timer: " << gameTimer << " | Wave Timer: " << waveTimer << std::endl;
                     SpawnEnemies();
                 }
@@ -469,6 +471,7 @@ private:
             if (isGamePaused) continue;
             enemy.Move(PC.GetPosition());
             enemy.ShootAtPlayer(enemyProjectileObjects, PC.GetPosition());
+            enemy.SetSpeed(std::get<2>(levelStats[gameLevel - 1]));
         }
     }
 
