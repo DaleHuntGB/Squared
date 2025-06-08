@@ -402,7 +402,6 @@ class GameManager
                 }
                 if (fmod(gameTimer, waveTimer) < 0.01f)
                 {
-                    std::cout << "Wave Timer: " << waveTimer << std::endl;
                     std::cout << "Game Timer: " << gameTimer << " | Wave Timer: " << waveTimer << std::endl;
                     SpawnEnemies();
                 }
@@ -473,6 +472,7 @@ private:
             enemy.ShootAtPlayer(enemyProjectileObjects, PC.GetPosition());
             enemy.SetSpeed(std::get<2>(levelStats[gameLevel - 1]));
         }
+        if (enemyUnits.empty()) { SpawnEnemies(); }
     }
 
     void HandleProjectiles()
@@ -632,7 +632,7 @@ private:
     std::vector<Projectile> enemyProjectileObjects;
 
     float gameTimer = 0;
-    float waveTimer = 5;
+    float waveTimer = 5.0f;
     bool isGameRunning = true;
     bool isGamePaused = false;
     bool gameShouldClose = false;
