@@ -367,8 +367,6 @@ class GameManager
 
     void Update()
     {
-        ClearBackground(RAYWHITE);
-
         DrawTexture(TM->backgroundTexture, 0, 0, WHITE);
 
         HandlePlayerInput();
