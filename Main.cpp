@@ -586,6 +586,17 @@ private:
         float GameOverMessageWidth = MeasureTextEx(FM->displayFont, GameOverMessage, 24, 0).x;
         DrawTextEx(FM->displayFont, GameOverMessage, {(SCREEN_WIDTH - GameOverMessageWidth) / 2, SCREEN_HEIGHT / 2}, 24, 0, BLACK);
         // TODO: Remove Enemies & Projectiles
+        for (auto& enemy : enemyUnits)
+        {
+            enemy.Destroy();
+            std::cout << "Enemy Destroyed" << std::endl;
+        }
+        for (auto& projectiles : enemyProjectileObjects)
+        {
+            projectiles.Destroy();
+            std::cout << "Enemy Projectile Destroyed" << std::endl;
+        }
+
     }
 
     void SetGameLevel(int level) { gameLevel = level; }
