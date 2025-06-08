@@ -426,8 +426,9 @@ private:
         }
         if (isGameRunning && IsKeyPressed(KEY_P))
         {
-            std::cout << "Game Paused" << std::endl;
             isGamePaused = !isGamePaused;
+            
+            std::cout << "Game Paused: " << isGamePaused << std::endl;
 
             for (auto& enemy : enemyUnits)
             {
