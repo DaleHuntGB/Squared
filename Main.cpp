@@ -581,6 +581,7 @@ private:
 
     void GameIsOver()
     {
+        isGamePaused = true;
         HandlePlayerInput(); // Handle Player Input to Restart or Quit
         char* GameOverMessage = "You died! Press R to Restart or Q to Quit."; // Char* for DrawTextEx Only :)
         float GameOverMessageWidth = MeasureTextEx(FM->displayFont, GameOverMessage, 24, 0).x;
