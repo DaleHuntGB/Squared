@@ -566,6 +566,10 @@ private:
         std::string enemiesKilledText = "Enemies Killed: " + std::to_string(enemiesKilled);
         if (isGameRunning)
         {
+            if (isGamePaused)
+            {
+                DrawTextEx(FM->displayFont, "Game Paused", {SCREEN_WIDTH / 2 - MeasureTextEx(FM->displayFont, "Game Paused", 32, 0).x / 2, SCREEN_HEIGHT / 2}, 32, 0, BLACK);
+            }
             DrawTextEx(FM->uiFont, healthText.c_str(), {10, 10}, 24, 0, BLACK);
             DrawTextEx(FM->uiFont, damageText.c_str(), {SCREEN_WIDTH - 150, 10}, 24, 0, BLACK);
             DrawTextEx(FM->uiFont, speedText.c_str(), {SCREEN_WIDTH - 150, 40}, 24, 0, BLACK);
