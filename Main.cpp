@@ -413,7 +413,7 @@ private:
         {
             gameShouldClose = true;
         }
-        if (IsKeyPressed(KEY_R))
+        if (IsKeyPressed(KEY_R) && isGamePaused)
         {
             Initialize(*TM, *FM, *PM);
         }
