@@ -276,12 +276,6 @@ class PowerUpManager {
 public:
 std::vector<PowerUps> powerUps;
 
-    void DestroyPowerUps() {
-        for (auto& powerUp : powerUps) {
-            powerUp.isActive = false;
-        }
-    }
-
     void SpawnPowerUp(Vector2 powerUpPosition, Texture2D powerUpTexture, PowerUpType powerUpType) {
         powerUps.push_back({powerUpPosition, powerUpTexture, powerUpType, true});
     }
@@ -610,7 +604,6 @@ private:
             projectiles.Destroy();
             std::cout << "Enemy Projectile Destroyed" << std::endl;
         }
-        PM->DestroyPowerUps();
     }
 
     void SetGameLevel(int level) { gameLevel = level; }
