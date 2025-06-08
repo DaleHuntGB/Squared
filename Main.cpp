@@ -319,13 +319,24 @@ class GameManager
 {
     public:
     // Level Stats: {Level, Enemies To Spawn, Enemy Speed}
-    std::vector<std::tuple<int, int, int>> levelStats = {
-        {1, 3, 1},
-        {2, 5, 2},
-        {3, 7, 3},
-        {4, 9, 4},
-        {5, 12, 5}
-    };
+    std::vector<std::tuple<int, int, float>> levelStats = {};
+
+    void GenerateLevelStats()
+    {
+        levelStats.clear();
+        levelStats.push_back({1, 3, 1});
+        levelStats.push_back({2, 5, 2});
+        levelStats.push_back({3, 7, 3});
+        levelStats.push_back({4, 9, 3.25});
+        levelStats.push_back({5, 12, 3.5});
+        // Dynamically generate more levels if needed
+        for (int i = 6; i <= 20; ++i)
+        {
+            int enemiesToSpawn = 3 + (i - 1) * 1; // Enemies Increase by 1 Every Level
+            int enemySpeed = 1 + (i - 1) * 0.25; // Enemy Speed Increases by 0.25 Every Level
+            levelStats.push_back({i, enemiesToSpawn, enemySpeed});
+        }
+    }
     
     void SpawnEnemies()
     {
@@ -362,6 +373,7 @@ class GameManager
         playerProjectileObjects.clear();
         enemyProjectileObjects.clear();
         PM.ClearPowerUps();
+        GenerateLevelStats();
         SpawnEnemies();
     }
 
