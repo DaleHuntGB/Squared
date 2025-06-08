@@ -410,6 +410,7 @@ private:
     void HandlePlayer()
     {
         PC.Draw(*TM);
+        if (isGamePaused) return;
         PC.Move(playerProjectileObjects);
     }
 
@@ -454,6 +455,7 @@ private:
         for (auto& enemy : enemyUnits)
         {
             enemy.Draw(*TM);
+            if (isGamePaused) continue;
             enemy.Move(PC.GetPosition());
             enemy.ShootAtPlayer(enemyProjectileObjects, PC.GetPosition());
         }
