@@ -272,9 +272,15 @@ float shootCooldown = 0;
 bool canShoot = false;
 };
 
-class PickupManager {
+class PowerUpManager {
 public:
 std::vector<PowerUps> powerUps;
+
+    void DestroyPowerUps() {
+        for (auto& powerUp : powerUps) {
+            powerUp.isActive = false;
+        }
+    }
 
     void SpawnPowerUp(Vector2 powerUpPosition, Texture2D powerUpTexture, PowerUpType powerUpType) {
         powerUps.push_back({powerUpPosition, powerUpTexture, powerUpType, true});
@@ -344,7 +350,7 @@ class GameManager
         }
 }
 
-    void Initialize(TextureManager& TM, FontManager& FM, PickupManager& PM)
+    void Initialize(TextureManager& TM, FontManager& FM, PowerUpManager& PM)
     {
         this->TM = &TM;
         this->FM = &FM;
@@ -604,7 +610,7 @@ private:
             projectiles.Destroy();
             std::cout << "Enemy Projectile Destroyed" << std::endl;
         }
-
+        PM->DestroyPowerUps();
     }
 
     void SetGameLevel(int level) { gameLevel = level; }
@@ -612,7 +618,7 @@ private:
 
     TextureManager* TM;
     FontManager* FM;
-    PickupManager* PM;
+    PowerUpManager* PM;
 
     Player PC;
     std::vector<Enemy> enemyUnits;
@@ -642,7 +648,7 @@ int main()
     GameManager GM;
     FontManager FM;
     TextureManager TM;
-    PickupManager PM;
+    PowerUpManager PM;
     SetupGameWindow(TM, FM);
     GM.Initialize(TM, FM, PM);
     while (!WindowShouldClose() && !GM.GameShouldClose())
