@@ -280,6 +280,7 @@ public:
 std::vector<PowerUps> powerUps;
 
     void SpawnPowerUp(Vector2 powerUpPosition, Texture2D powerUpTexture, PowerUpType powerUpType) {
+        if (GetRandomValue(0, 1) == 0) return; // Power-ups are spawning too frequently, let's "randomly" skip some
         powerUps.push_back({powerUpPosition, powerUpTexture, powerUpType, true});
     }
 
