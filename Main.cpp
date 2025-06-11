@@ -36,7 +36,8 @@ enum PowerUpType
 {
     HEALTH = 0,
     LIFE = 1,
-    DAMAGE = 2
+    DAMAGE = 2,
+    // MULTI_SHOT = 3,
 };
 
 struct PowerUps 
