@@ -329,10 +329,10 @@ class GameManager
     {
         levelStats.clear();
         levelStats.push_back({1, 3, 1});
-        levelStats.push_back({2, 5, 2});
-        levelStats.push_back({3, 7, 3});
-        levelStats.push_back({4, 9, 3.25});
-        levelStats.push_back({5, 12, 3.5});
+        levelStats.push_back({2, 5, 1.25});
+        levelStats.push_back({3, 7, 1.5});
+        levelStats.push_back({4, 9, 1.75});
+        levelStats.push_back({5, 12, 2});
         // Dynamically generate more levels if needed
         for (int i = 6; i <= 20; ++i)
         {
