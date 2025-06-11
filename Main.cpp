@@ -324,7 +324,7 @@ class GameManager
     public:
     // Level Stats: {Level, Enemies To Spawn, Enemy Speed}
     std::vector<std::tuple<int, int, float>> levelStats = {};
-
+    int playerScore = 0;
     void GenerateLevelStats()
     {
         levelStats.clear();
@@ -534,7 +534,8 @@ private:
                         PM->SpawnPowerUp(enemyUnits[i].GetPosition(), TM->powerUpTextures[powerUpType], powerUpType);
                         enemyUnits.erase(enemyUnits.begin() + i);
                         enemiesKilled++;
-                        if (enemiesKilled == std::get<2>(levelStats[gameLevel - 1]))
+                        playerScore += 1;
+                        if (playerScore % 10 == 0)
                         {
                             gameLevel++;
                             enemiesKilled = 0;
