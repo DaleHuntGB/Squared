@@ -208,7 +208,7 @@ class Player : public Entity
         {
             entityPosition.y += entitySpeed;
         }
-        if (IsKeyPressed(KEY_SPACE))
+        if (IsKeyPressed(KEY_SPACE) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
             Vector2 mousePosition = GetMousePosition();
             Projectile::Shoot(projectileObjects, entityPosition, mousePosition, 10, 20, 5);
