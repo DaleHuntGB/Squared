@@ -538,9 +538,10 @@ private:
                         if (playerScore % 10 == 0)
                         {
                             gameLevel++;
-                            enemiesKilled = 0;
-                            PC.SetHealth(100);
-                            PC.SetPlayerLives(3);
+                            std::cout << "Level Up! New Level: " << gameLevel << std::endl;
+                            // I don't think I need to set the health & lives back here, the player is recovering health & lives from power-ups.
+                            // PC.SetHealth(100);
+                            // PC.SetPlayerLives(3);
                         }
                         --i;
                     }
