@@ -372,6 +372,7 @@ class GameManager
         gameTimer = 0;
 
         isGameRunning = true;
+        isGamePaused = true;
 
         enemyUnits.clear();
         playerProjectileObjects.clear();
@@ -588,7 +589,11 @@ private:
         {
             if (isGamePaused)
             {
+                DrawTexture(TM->backgroundTexture, 0, 0, WHITE);
                 DrawTextEx(FM->displayFont, "Game Paused", {SCREEN_WIDTH / 2 - MeasureTextEx(FM->displayFont, "Game Paused", 32, 0).x / 2, SCREEN_HEIGHT / 2}, 32, 0, BLACK);
+                DrawTextEx(FM->displayFont, "Press P to Resume", {SCREEN_WIDTH / 2 - MeasureTextEx(FM->displayFont, "Press P to Resume", 24, 0).x / 2, SCREEN_HEIGHT / 2 + 40}, 24, 0, BLACK);
+                DrawTextEx(FM->displayFont, "Press R to Restart", {SCREEN_WIDTH / 2 - MeasureTextEx(FM->displayFont, "Press R to Restart", 24, 0).x / 2, SCREEN_HEIGHT / 2 + 80}, 24, 0, BLACK);
+                DrawTextEx(FM->displayFont, "Press Q to Quit", {SCREEN_WIDTH / 2 - MeasureTextEx(FM->displayFont, "Press Q to Quit", 24, 0).x / 2, SCREEN_HEIGHT / 2 + 120}, 24, 0, BLACK);
             }
             DrawTextEx(FM->uiFont, healthText.c_str(), {10, 10}, 24, 0, BLACK);
             DrawTextEx(FM->uiFont, damageText.c_str(), {SCREEN_WIDTH - 150, 10}, 24, 0, BLACK);
