@@ -37,7 +37,7 @@ enum PowerUpType
     HEALTH = 0,
     LIFE = 1,
     DAMAGE = 2,
-    // MULTI_SHOT = 3,
+    MULTI_SHOT = 3,
 };
 
 struct PowerUps 
@@ -55,7 +55,7 @@ public:
     Texture2D playerTexture;
     Texture2D enemyTexture;
     Texture2D projectileTexture;
-    Texture2D powerUpTextures[3];
+    Texture2D powerUpTextures[4];
 
     void LoadTextures()
     {
@@ -66,6 +66,7 @@ public:
         powerUpTextures[HEALTH] = LoadTexture("Resources/Assets/Health.png");
         powerUpTextures[LIFE] = LoadTexture("Resources/Assets/Life.png");
         powerUpTextures[DAMAGE] = LoadTexture("Resources/Assets/PowerUp.png");
+        powerUpTextures[MULTI_SHOT] = LoadTexture("Resources/Assets/MultiShot.png");
     }
 
     void UnloadTextures()
@@ -74,7 +75,7 @@ public:
         UnloadTexture(enemyTexture);
         UnloadTexture(projectileTexture);
         UnloadTexture(backgroundTexture);
-        UnloadTexture(powerUpTextures[3]);
+        UnloadTexture(powerUpTextures[4]);
     }
 };
 
@@ -190,6 +191,26 @@ class Player : public Entity
         DrawTextureEx(TM.playerTexture, entityPosition, 0, 1, WHITE);
     }
 
+    void MultiShot(std::vector<Projectile>& projectileObjects, Vector2 startPosition, Vector2 targetPosition, int speed, int damage, int size)
+    {
+        Vector2 baseDir = { targetPosition.x - startPosition.x, targetPosition.y - startPosition.y };
+        float mag = sqrt(baseDir.x * baseDir.x + baseDir.y * baseDir.y);
+        if (mag == 0) return;
+        baseDir.x /= mag;
+        baseDir.y /= mag;
+
+        float angles[3] = { -15.0f, 0.0f, 15.0f };
+        for (float a : angles)
+        {
+            float rad = a * DEG2RAD;
+            Vector2 dir = {
+                baseDir.x * cos(rad) - baseDir.y * sin(rad),
+                baseDir.x * sin(rad) + baseDir.y * cos(rad)
+            };
+            projectileObjects.emplace_back(startPosition, dir, speed, damage, size);
+        }
+    }
+
     void Move(std::vector<Projectile>& projectileObjects)
     {
         if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D))
@@ -211,18 +232,26 @@ class Player : public Entity
         if (IsKeyPressed(KEY_SPACE) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
             Vector2 mousePosition = GetMousePosition();
-            Projectile::Shoot(projectileObjects, entityPosition, mousePosition, 10, 20, 5);
+            if (hasMultiShot)
+                MultiShot(projectileObjects, entityPosition, mousePosition, 10, 20, 5);
+            else
+                Projectile::Shoot(projectileObjects, entityPosition, mousePosition, 10, 20, 5);
         }
+
         
         if (entityPosition.x > SCREEN_WIDTH) entityPosition.x = 0;
         if (entityPosition.x < 0) entityPosition.x = SCREEN_WIDTH;
         if (entityPosition.y > SCREEN_HEIGHT) entityPosition.y = 0;
         if (entityPosition.y < 0) entityPosition.y = SCREEN_HEIGHT;
     }
+
     int SetPlayerLives(int lives) { return playerLives = lives; }
     int GetPlayerLives() { return playerLives; }
+    void SetMultiShot(bool enabled) { hasMultiShot = enabled; }
+    bool HasMultiShot() const { return hasMultiShot; }
     private:
     int playerLives = 3;
+    bool hasMultiShot = false;
 };
 
 class Enemy : public Entity
@@ -311,6 +340,9 @@ std::vector<PowerUps> powerUps;
                         break;
                     case DAMAGE:
                         player.SetDamage(player.GetDamage() + 1.25);
+                        break;
+                    case MULTI_SHOT:
+                        player.SetMultiShot(true);
                         break;
                 }
                 powerUps[i].isActive = false;
@@ -531,7 +563,7 @@ private:
 
                     if (enemyUnits[i].GetHealth() <= 0)
                     {
-                        PowerUpType powerUpType = static_cast<PowerUpType>(GetRandomValue(HEALTH, DAMAGE));
+                        PowerUpType powerUpType = static_cast<PowerUpType>(GetRandomValue(HEALTH, player.HasMultiShot() ? DAMAGE : MULTI_SHOT)); // Only spawn a multi-shot if the player doesn't already possess it.
                         PM->SpawnPowerUp(enemyUnits[i].GetPosition(), TM->powerUpTextures[powerUpType], powerUpType);
                         enemyUnits.erase(enemyUnits.begin() + i);
                         enemiesKilled++;
