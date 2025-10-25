@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <map>
+#include <ctime>
 
 #define SCREEN_WIDTH 720
 #define SCREEN_HEIGHT 720
@@ -285,7 +286,8 @@ void Move(Vector2 playerPosition)
         
         if (distance > 0 && canShoot)
         {
-            Projectile::Shoot(projectileObjects, entityPosition, playerPosition, 5, 10, 5);
+            Projectile::Shoot(projectileObjects, entityPosition, playerPosition, 5, GetDamage(), 5);
+            std::cout << GetDamage();
             canShoot = false;
         }
         else
@@ -354,29 +356,32 @@ std::vector<PowerUps> powerUps;
 class GameManager
 {
     public:
-    // Level Stats: {Level, Enemies To Spawn, Enemy Speed}
-    std::vector<std::tuple<int, int, float>> levelStats = {};
+    // Level Stats: {Level, Enemies To Spawn, Enemy Speed, Enemy Damage}
+    std::vector<std::tuple<int, int, float, int>> levelStats = {};
     int playerScore = 0;
     void GenerateLevelStats()
     {
         levelStats.clear();
-        levelStats.push_back({1, 3, 1});
-        levelStats.push_back({2, 5, 1.25});
-        levelStats.push_back({3, 7, 1.5});
-        levelStats.push_back({4, 9, 1.75});
-        levelStats.push_back({5, 12, 2});
+        levelStats.push_back({1, 3, 1, 10});
+        levelStats.push_back({2, 5, 1.25, 10});
+        levelStats.push_back({3, 7, 1.5, 10});
+        levelStats.push_back({4, 9, 1.75, 10});
+        levelStats.push_back({5, 12, 2, 10});
         // Dynamically generate more levels if needed
-        for (int i = 6; i <= 20; ++i)
+        for (int i = 6; i <= 99; ++i)
         {
-            int enemiesToSpawn = 3 + (i - 1) * 1; // Enemies Increase by 1 Every Level
-            int enemySpeed = 1 + (i - 1) * 0.25; // Enemy Speed Increases by 0.25 Every Level
-            levelStats.push_back({i, enemiesToSpawn, enemySpeed});
+            int enemiesToSpawn = 3 + (i - 1) * 1;
+            float enemySpeed = 1 + (i - 1) * 0.25; // Enemy Speed Increases by 0.25 Every Level
+            int enemyDamage = 10 + (i - 1) * 0.5;
+            levelStats.push_back({i, enemiesToSpawn, enemySpeed, enemyDamage});
+            std::cout << "Generated Level: " << i << " | Enemies: " << enemiesToSpawn << " | Damage: " << enemyDamage << "\n";
         }
     }
     
     void SpawnEnemies()
     {
         int enemySpeed = std::get<2>(levelStats[gameLevel - 1]);
+        int enemyDamage = std::get<3>(levelStats[gameLevel - 1]);
         if (gameLevel < 1 || gameLevel > levelStats.size()) { std::cout << "No Enemy For Level: " << gameLevel << std::endl; return; }
         int enemiesToSpawn = std::get<1>(levelStats[gameLevel - 1]);
         std::cout << "Game Level: " << gameLevel << " | Enemies Killed: " << enemiesKilled << std::endl;
@@ -386,6 +391,7 @@ class GameManager
             Enemy enemy;
             enemy.SetPosition((Vector2){ GetRandomValue(-200, SCREEN_WIDTH + 200), GetRandomValue(-200, SCREEN_HEIGHT + 200) });
             enemy.SetSpeed(enemySpeed);
+            enemy.SetDamage(enemyDamage);
             enemyUnits.push_back(enemy);
             std::cout << "Spawned: " << i + 1 << " Enemies" << std::endl;
         }
@@ -570,7 +576,7 @@ private:
                         enemyUnits.erase(enemyUnits.begin() + i);
                         enemiesKilled++;
                         playerScore += 1;
-                        if (playerScore % 10 == 0)
+                        if (playerScore % 1 == 0)
                         {
                             gameLevel++;
                             std::cout << "Level Up! New Level: " << gameLevel << std::endl;
