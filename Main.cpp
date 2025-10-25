@@ -454,6 +454,8 @@ class GameManager
 
     bool GameShouldClose() const { return gameShouldClose; }
 
+    int GetPlayerScore() const { return playerScore; }
+
 private:
     void HandlePlayer()
     {
@@ -563,7 +565,7 @@ private:
 
                     if (enemyUnits[i].GetHealth() <= 0)
                     {
-                        PowerUpType powerUpType = static_cast<PowerUpType>(GetRandomValue(HEALTH, player.HasMultiShot() ? DAMAGE : MULTI_SHOT)); // Only spawn a multi-shot if the player doesn't already possess it.
+                        PowerUpType powerUpType = static_cast<PowerUpType>(GetRandomValue(HEALTH, PC.HasMultiShot() ? DAMAGE : MULTI_SHOT)); // Only spawn a multi-shot if the player doesn't already possess it.
                         PM->SpawnPowerUp(enemyUnits[i].GetPosition(), TM->powerUpTextures[powerUpType], powerUpType);
                         enemyUnits.erase(enemyUnits.begin() + i);
                         enemiesKilled++;
@@ -611,12 +613,7 @@ private:
     {
         std::string healthText = "Health: " + std::to_string(PC.GetHealth());
         std::string playerLivesText = "Lives: " + std::to_string(PC.GetPlayerLives());
-        std::string damageText = "Damage: " + std::to_string(PC.GetDamage());
-        std::string speedText = "Speed: " + std::to_string(PC.GetSpeed());
-        std::string gameTimerText = "Game Time: " + std::to_string((int)gameTimer);
-        std::string activeEnemiesText = "Active Enemies: " + std::to_string(enemyUnits.size());
-        std::string gameLevelText = "Level: " + std::to_string(gameLevel);
-        std::string enemiesKilledText = "Enemies Killed: " + std::to_string(enemiesKilled);
+        std::string playerScoreText = "Score: " + std::to_string(playerScore);
         if (isGameRunning)
         {
             if (isGamePaused)
@@ -628,13 +625,8 @@ private:
                 DrawTextEx(FM->displayFont, "Press Q to Quit", {SCREEN_WIDTH / 2 - MeasureTextEx(FM->displayFont, "Press Q to Quit", 24, 0).x / 2, SCREEN_HEIGHT / 2 + 120}, 24, 0, BLACK);
             }
             DrawTextEx(FM->uiFont, healthText.c_str(), {10, 10}, 24, 0, BLACK);
-            DrawTextEx(FM->uiFont, damageText.c_str(), {SCREEN_WIDTH - 150, 10}, 24, 0, BLACK);
-            DrawTextEx(FM->uiFont, speedText.c_str(), {SCREEN_WIDTH - 150, 40}, 24, 0, BLACK);
             DrawTextEx(FM->uiFont, playerLivesText.c_str(), {10, 40}, 24, 0, BLACK);
-            DrawTextEx(FM->uiFont, gameTimerText.c_str(), {10, 70}, 24, 0, BLACK);
-            DrawTextEx(FM->uiFont, activeEnemiesText.c_str(), {10, 100}, 24, 0, BLACK);
-            DrawTextEx(FM->uiFont, gameLevelText.c_str(), {10, 130}, 24, 0, BLACK);
-            DrawTextEx(FM->uiFont, enemiesKilledText.c_str(), {10, 160}, 24, 0, BLACK);
+            DrawTextEx(FM->uiFont, playerScoreText.c_str(), {10, 70}, 24, 0, BLACK);
         }
         else
         {
