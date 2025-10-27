@@ -287,7 +287,6 @@ void Move(Vector2 playerPosition)
         if (distance > 0 && canShoot)
         {
             Projectile::Shoot(projectileObjects, entityPosition, playerPosition, 5, GetDamage(), 5);
-            std::cout << GetDamage();
             canShoot = false;
         }
         else
@@ -407,6 +406,10 @@ class GameManager
         PC.SetSpeed(5);
         PC.SetPosition({SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2});
         PC.SetPlayerLives(3);
+        PC.SetMultiShot(false);
+        playerScore = 0;
+        gameLevel = 1;
+        enemiesKilled = 0;
         gameTimer = 0;
 
         isGameRunning = true;
@@ -576,7 +579,7 @@ private:
                         enemyUnits.erase(enemyUnits.begin() + i);
                         enemiesKilled++;
                         playerScore += 1;
-                        if (playerScore % 1 == 0)
+                        if (playerScore % 10 == 0)
                         {
                             gameLevel++;
                             std::cout << "Level Up! New Level: " << gameLevel << std::endl;
